@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: projects
+    // Document ID: {projectId}
+    // Fields:
+    //   - id: string
+    //   - userId: string (immutable after creation)
+    //   - name: string
+    //   - domain: string
+    //   - niche: string
+    //   - region: string
+    //   - budget: string
+    //   - kpi: string
+    //   - status: string
+    //   - stage: string
+    //   - focus: string
+    //   - bottleneck: string
+    //   - nextStep: string
+    //   - lastUpdated: string
+    //   - tasks: string (JSON stringified array)
+    //   - queue: string (JSON stringified array)
+    //   - log: string (JSON stringified array)
+    //   - completed: string (JSON stringified array)
+    //
+    // ===============================================================
+
+    // Check if the user is authenticated
+    function isAuthenticated() {
+       return request.auth != null;
+    }
+
+    // Check if user owns the resource
+    function isOwner(userId) {
+       return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user is owner based on document's userId field
+    function isDocOwner() {
+       return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    // Verify userId hasn't been tampered with on create
+    function uidUnchanged() {
+       return !('userId' in request.resource.data) ||
+         request.resource.data.userId == request.auth.uid;
+    }
+
+    // Ensure userId field is not modified on update
+    function uidNotModified() {
+       return !('userId' in request.resource.data) ||
+         request.resource.data.userId == resource.data.userId;
+    }
+
+    // Validate string length
+    function validStringLength(field, minLen, maxLen) {
+       return request.resource.data[field] is string &&
+         request.resource.data[field].size() >= minLen &&
+         request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll(['id', 'userId', 'name']) &&
+             data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             (!('domain' in data) || (data.domain is string && data.domain.size() <= 500)) &&
+             (!('niche' in data) || (data.niche is string && data.niche.size() <= 500)) &&
+             (!('region' in data) || (data.region is string && data.region.size() <= 500)) &&
+             (!('budget' in data) || (data.budget is string && data.budget.size() <= 500)) &&
+             (!('kpi' in data) || (data.kpi is string && data.kpi.size() <= 500)) &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 100)) &&
+             (!('stage' in data) || (data.stage is string && data.stage.size() <= 100)) &&
+             (!('focus' in data) || (data.focus is string && data.focus.size() <= 1000)) &&
+             (!('bottleneck' in data) || (data.bottleneck is string && data.bottleneck.size() <= 1000)) &&
+             (!('nextStep' in data) || (data.nextStep is string && data.nextStep.size() <= 1000)) &&
+             (!('lastUpdated' in data) || (data.lastUpdated is string && data.lastUpdated.size() <= 100)) &&
+             (!('tasks' in data) || (data.tasks is string && data.tasks.size() <= 500000)) &&
+             (!('queue' in data) || (data.queue is string && data.queue.size() <= 500000)) &&
+             (!('log' in data) || (data.log is string && data.log.size() <= 500000)) &&
+             (!('completed' in data) || (data.completed is string && data.completed.size() <= 500000));
+    }
+
+    match /projects/{projectId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && uidUnchanged() && isValidProject(request.resource.data);
+      allow update: if isDocOwner() && uidNotModified() && isValidProject(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+  }
+}

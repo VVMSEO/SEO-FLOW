@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A SEO project managed by a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "domain": { "type": "string" },
+        "niche": { "type": "string" },
+        "region": { "type": "string" },
+        "budget": { "type": "string" },
+        "kpi": { "type": "string" },
+        "status": { "type": "string" },
+        "stage": { "type": "string" },
+        "focus": { "type": "string" },
+        "bottleneck": { "type": "string" },
+        "nextStep": { "type": "string" },
+        "lastUpdated": { "type": "string" },
+        "tasks": { "type": "string", "description": "JSON stringified array of tasks" },
+        "queue": { "type": "string", "description": "JSON stringified array of queue items" },
+        "log": { "type": "string", "description": "JSON stringified array of log items" },
+        "completed": { "type": "string", "description": "JSON stringified array of completed items" }
+      },
+      "required": ["id", "userId", "name"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Stores SEO projects for users."
+    }
+  }
+}
