@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProjects } from '../hooks/useProjects';
-import { Plus, Folder, LayoutDashboard, ListTodo, List, BookOpen, CheckCircle, LogOut } from 'lucide-react';
+import { Plus, Folder, LayoutDashboard, ListTodo, List, BookOpen, CheckCircle, LogOut, Download } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../lib/utils';
 import { OverviewTab } from './tabs/OverviewTab';
@@ -10,6 +10,7 @@ import { LogTab } from './tabs/LogTab';
 import { CompletedTab } from './tabs/CompletedTab';
 import { User, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
+import { exportProjectToExcel } from '../lib/exportExcel';
 
 type TabType = 'overview' | 'current' | 'queue' | 'log' | 'completed';
 
@@ -30,6 +31,12 @@ export function AppLayout({ user }: { user: User }) {
 
   const handleLogout = () => {
     signOut(auth);
+  };
+
+  const handleExport = () => {
+    if (activeProject) {
+      exportProjectToExcel(activeProject);
+    }
   };
 
   return (
@@ -103,7 +110,13 @@ export function AppLayout({ user }: { user: User }) {
           <>
             {/* Top Navigation */}
             <div className="bg-white border-b border-slate-200 px-6 h-16 flex items-center justify-between shrink-0">
-              <h2 className="text-lg font-semibold tracking-tight text-slate-800">{activeProject.name}</h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-lg font-semibold tracking-tight text-slate-800">{activeProject.name}</h2>
+                <Button variant="ghost" size="sm" onClick={handleExport} className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 h-8" title="Экспорт в Excel">
+                  <Download className="h-4 w-4 mr-1.5" />
+                  <span className="text-xs font-medium">Excel</span>
+                </Button>
+              </div>
               
               <div className="flex h-full">
                 <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Обзор</TabButton>

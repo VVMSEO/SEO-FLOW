@@ -3,7 +3,7 @@ import { Project } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { Textarea } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { Badge } from '../ui/Badge';
 
 interface Props {
@@ -67,19 +67,19 @@ export function OverviewTab({ project, updateProject }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6 relative overflow-hidden border-l-4 border-l-blue-600">
           <div className="text-sm font-bold mb-2 flex items-center gap-2 uppercase tracking-wide">Фокус месяца</div>
-          <Textarea value={project.focus} onChange={e => handleChange('focus', e.target.value)} placeholder="Например: индексация каталога..." className="text-lg font-normal leading-relaxed border-none shadow-none px-0 resize-none focus-visible:ring-0 min-h-[80px]" />
+          <Textarea value={project.focus} onChange={e => handleChange('focus', e.target.value)} placeholder="Например: индексация каталога..." className="text-lg font-normal leading-relaxed border-none shadow-none px-0 resize-y focus-visible:ring-0 min-h-[80px]" />
         </Card>
         
         <Card className="p-6 relative overflow-hidden border-l-4 border-l-red-500">
           <div className="text-sm font-bold mb-2 flex items-center gap-2 uppercase tracking-wide">Узкое место</div>
-          <Textarea value={project.bottleneck} onChange={e => handleChange('bottleneck', e.target.value)} placeholder="Опишите узкое место..." className="text-lg font-normal leading-relaxed border-none shadow-none px-0 resize-none focus-visible:ring-0 min-h-[80px]" />
+          <Textarea value={project.bottleneck} onChange={e => handleChange('bottleneck', e.target.value)} placeholder="Опишите узкое место..." className="text-lg font-normal leading-relaxed border-none shadow-none px-0 resize-y focus-visible:ring-0 min-h-[80px]" />
         </Card>
       </div>
 
       <div className="bg-blue-600 text-white p-8 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg">
         <div className="flex-1 w-full">
           <h2 className="text-xs uppercase opacity-80 mb-2 tracking-[0.1em]">Следующий шаг</h2>
-          <Textarea value={project.nextStep} onChange={e => handleChange('nextStep', e.target.value)} placeholder="Что нужно сделать прямо сейчас?" className="text-2xl md:text-3xl font-semibold border-none shadow-none px-0 resize-none bg-transparent text-white placeholder:text-blue-200 focus-visible:ring-0 min-h-[80px] w-full" />
+          <Textarea value={project.nextStep} onChange={e => handleChange('nextStep', e.target.value)} placeholder="Что нужно сделать прямо сейчас?" className="text-2xl md:text-3xl font-semibold border-none shadow-none px-0 resize-y bg-transparent text-white placeholder:text-blue-200 focus-visible:ring-0 min-h-[80px] w-full" />
         </div>
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 shrink-0 hidden md:block"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </div>

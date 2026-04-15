@@ -3,6 +3,7 @@ import { Project, Task, TaskLayer, TaskPriority, TaskStatus } from '../../types'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Badge } from '../ui/Badge';
 import { Plus, Trash2, CheckCircle2 } from 'lucide-react';
@@ -86,11 +87,11 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                         {task.status}
                       </span>
                     </div>
-                    <Input 
+                    <Textarea 
                       value={task.name} 
                       onChange={e => updateTask(task.id, { name: e.target.value })} 
                       placeholder="Название задачи..." 
-                      className="font-semibold text-sm h-auto py-1 px-0 border-none shadow-none focus-visible:ring-0"
+                      className="font-semibold text-sm min-h-[40px] py-1 px-0 border-none shadow-none focus-visible:ring-0 resize-y"
                     />
                   </div>
                   <div className="flex items-center space-x-2 shrink-0">
@@ -111,7 +112,11 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-3 border-t border-slate-100">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 pt-3 border-t border-slate-100">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-semibold text-slate-500">Дата начала</label>
+                    <Input type="date" value={task.startDate || ''} onChange={e => updateTask(task.id, { startDate: e.target.value })} className="h-7 text-xs border-slate-200" />
+                  </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Слой</label>
                     <Select value={task.layer} onChange={e => updateTask(task.id, { layer: e.target.value as TaskLayer })} className="h-7 text-xs border-slate-200">
@@ -149,7 +154,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
 
                 <div className="mt-3 space-y-1">
                   <label className="text-[10px] uppercase font-semibold text-slate-500">Что проверить</label>
-                  <Input value={task.whatToCheck} onChange={e => updateTask(task.id, { whatToCheck: e.target.value })} placeholder="Например: страницы в индексе, рост показов..." className="h-8 text-sm border-slate-200 bg-slate-50" />
+                  <Textarea value={task.whatToCheck} onChange={e => updateTask(task.id, { whatToCheck: e.target.value })} placeholder="Например: страницы в индексе, рост показов..." className="min-h-[40px] text-sm border-slate-200 bg-slate-50 resize-y" />
                 </div>
               </div>
             </Card>

@@ -3,6 +3,7 @@ import { Project, CompletedItem, TaskLayer, TaskPriority, CompletedResult } from
 import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Plus, Trash2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -71,11 +72,11 @@ export function CompletedTab({ project, updateProject }: Props) {
                   </div>
                   
                   <div className="flex-1 w-full">
-                    <Input 
+                    <Textarea 
                       value={item.name} 
                       onChange={e => updateItem(item.id, { name: e.target.value })} 
                       placeholder="Название закрытой задачи..." 
-                      className="h-9 text-sm font-semibold border-slate-200 focus-visible:ring-blue-600"
+                      className="min-h-[40px] text-sm font-semibold border-slate-200 focus-visible:ring-blue-600 resize-y"
                     />
                   </div>
                   

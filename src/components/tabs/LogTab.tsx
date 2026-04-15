@@ -2,7 +2,8 @@ import React from 'react';
 import { Project, LogItem, EffectStatus } from '../../types';
 import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { Input, Textarea } from '../ui/Input';
+import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Plus, Trash2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -102,7 +103,7 @@ export function LogTab({ project, updateProject }: Props) {
                         value={item.whatWasDone} 
                         onChange={e => updateItem(item.id, { whatWasDone: e.target.value })} 
                         placeholder="Законченный SEO-блок работ..."
-                        className="min-h-[80px] text-sm border-slate-200 focus-visible:ring-blue-600"
+                        className="min-h-[80px] text-sm border-slate-200 focus-visible:ring-blue-600 resize-y"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -119,11 +120,11 @@ export function LogTab({ project, updateProject }: Props) {
                   <div className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Что проверить</label>
-                      <Input 
+                      <Textarea 
                         value={item.whatToCheck} 
                         onChange={e => updateItem(item.id, { whatToCheck: e.target.value })} 
                         placeholder="Контроль результата..."
-                        className="h-9 text-sm border-slate-200 focus-visible:ring-blue-600"
+                        className="min-h-[40px] text-sm border-slate-200 focus-visible:ring-blue-600 resize-y"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -132,7 +133,7 @@ export function LogTab({ project, updateProject }: Props) {
                         value={item.reportString} 
                         onChange={e => updateItem(item.id, { reportString: e.target.value })} 
                         placeholder="Формулировка для клиента..."
-                        className="min-h-[80px] text-sm bg-slate-50 border-slate-200 focus-visible:ring-blue-600"
+                        className="min-h-[80px] text-sm bg-slate-50 border-slate-200 focus-visible:ring-blue-600 resize-y"
                       />
                     </div>
                   </div>

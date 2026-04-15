@@ -3,6 +3,7 @@ import { Project, QueueItem, TaskLayer, QueueDecision, QueueStatus } from '../..
 import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Plus, Trash2, ArrowUpRight } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -101,14 +102,18 @@ export function QueueTab({ project, updateProject }: Props) {
                 {/* Main Info */}
                 <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-slate-200 space-y-4">
                   <div className="flex gap-2">
-                    <Input 
+                    <Textarea 
                       value={item.name} 
                       onChange={e => updateItem(item.id, { name: e.target.value })} 
                       placeholder="Суть задачи/идеи..." 
-                      className="font-semibold text-base h-auto py-1 px-0 border-none shadow-none focus-visible:ring-0"
+                      className="font-semibold text-base min-h-[40px] py-1 px-0 border-none shadow-none focus-visible:ring-0 resize-y"
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Дата добавления</label>
+                      <Input type="date" value={item.addedDate} onChange={e => updateItem(item.id, { addedDate: e.target.value })} className="h-8 text-xs border-slate-200 bg-slate-50" />
+                    </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Источник</label>
                       <Input value={item.source} onChange={e => updateItem(item.id, { source: e.target.value })} placeholder="GSC, Аудит..." className="h-8 text-xs border-slate-200 bg-slate-50" />
