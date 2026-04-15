@@ -22,6 +22,8 @@ export interface Project {
   bottleneck: string;
   nextStep: string;
   lastUpdated: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
   tasks: Task[];
   queue: QueueItem[];
   log: LogItem[];
@@ -41,6 +43,9 @@ export interface Task {
   whatToCheck: string;
   nextCheckDate?: string;
   reportString?: string;
+  docLink?: string;
+  lastOverdueReminder?: string;
+  lastCheckReminder?: string;
 }
 
 export interface QueueItem {
@@ -71,6 +76,7 @@ export interface LogItem {
   reportString: string;
   nextCheckDate?: string;
   comment?: string;
+  docLink?: string;
 }
 
 export interface CompletedItem {
@@ -83,4 +89,5 @@ export interface CompletedItem {
   result: CompletedResult;
   whatToCheck?: string;
   comment?: string;
+  docLink?: string;
 }

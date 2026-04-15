@@ -83,6 +83,22 @@ export function OverviewTab({ project, updateProject }: Props) {
         </div>
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 shrink-0 hidden md:block"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </div>
+
+      <Card className="p-5 mt-4 border-slate-200">
+        <h3 className="text-sm font-bold mb-4 uppercase tracking-wide text-slate-700">Настройки Telegram уведомлений</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Bot Token</label>
+            <Input type="password" value={project.telegramBotToken || ''} onChange={e => handleChange('telegramBotToken', e.target.value)} placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" className="font-mono text-xs border-slate-200" />
+            <p className="text-[10px] text-slate-400">Токен бота от @BotFather</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Chat ID</label>
+            <Input value={project.telegramChatId || ''} onChange={e => handleChange('telegramChatId', e.target.value)} placeholder="-1001234567890" className="font-mono text-xs border-slate-200" />
+            <p className="text-[10px] text-slate-400">ID чата или пользователя (можно узнать через @userinfobot)</p>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

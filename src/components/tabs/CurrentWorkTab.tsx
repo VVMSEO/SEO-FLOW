@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Project, Task, TaskLayer, TaskPriority, TaskStatus } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -6,9 +6,10 @@ import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Badge } from '../ui/Badge';
-import { Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Bell } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { cn } from '../../lib/utils';
+import { sendTelegramMessage } from '../../lib/telegram';
 
 interface Props {
   project: Project;
@@ -16,6 +17,52 @@ interface Props {
 }
 
 export function CurrentWorkTab({ project, updateProject }: Props) {
+  const hasCheckedReminders = useRef(false);
+  const [checkTrigger, setCheckTrigger] = useState(0);
+
+  useEffect(() => {
+    if (hasCheckedReminders.current && checkTrigger === 0) return;
+    if (!project.telegramBotToken || !project.telegramChatId) return;
+
+    const checkAndSendReminders = async () => {
+      hasCheckedReminders.current = true;
+      const today = new Date().toISOString().split('T')[0];
+      let hasUpdates = false;
+      const updatedTasks = [...project.tasks];
+
+      for (let i = 0; i < updatedTasks.length; i++) {
+        const task = updatedTasks[i];
+        if (task.status === 'Сделано' || task.status === 'Отменено') continue;
+
+        // Check Overdue
+        if (task.deadline && task.deadline < today && task.lastOverdueReminder !== today) {
+          const msg = `⚠️ <b>Просроченная задача!</b>\n\n<b>Проект:</b> ${project.name}\n<b>Задача:</b> ${task.name}\n<b>Дедлайн:</b> ${task.deadline}\n<b>Ответственный:</b> ${task.assignee}`;
+          const success = await sendTelegramMessage(project.telegramBotToken!, project.telegramChatId!, msg);
+          if (success) {
+            updatedTasks[i] = { ...updatedTasks[i], lastOverdueReminder: today };
+            hasUpdates = true;
+          }
+        }
+
+        // Check Next Check Date
+        if (task.nextCheckDate && task.nextCheckDate <= today && task.lastCheckReminder !== today) {
+          const msg = `🔍 <b>Пора проверить задачу!</b>\n\n<b>Проект:</b> ${project.name}\n<b>Задача:</b> ${task.name}\n<b>Что проверить:</b> ${task.whatToCheck || 'Не указано'}`;
+          const success = await sendTelegramMessage(project.telegramBotToken!, project.telegramChatId!, msg);
+          if (success) {
+            updatedTasks[i] = { ...updatedTasks[i], lastCheckReminder: today };
+            hasUpdates = true;
+          }
+        }
+      }
+
+      if (hasUpdates) {
+        updateProject(project.id, { tasks: updatedTasks });
+      }
+    };
+
+    checkAndSendReminders();
+  }, [project.id, project.telegramBotToken, project.telegramChatId, project.tasks, project.name, updateProject, checkTrigger]);
+
   const addTask = () => {
     if (project.tasks.length >= 5) {
       alert("WIP-лимит: не больше 5 активных задач одновременно.");
@@ -57,10 +104,28 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
           <h2 className="text-lg font-semibold">Текущая работа</h2>
           <p className="text-sm text-slate-500">Активные задачи (WIP-лимит: 3-5). Сейчас в работе: {project.tasks.length}</p>
         </div>
-        <Button onClick={addTask} disabled={project.tasks.length >= 5} className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="h-4 w-4 mr-2" />
-          Добавить задачу
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => {
+              if (!project.telegramBotToken || !project.telegramChatId) {
+                alert("Сначала настройте Telegram Bot Token и Chat ID во вкладке 'Обзор'");
+                return;
+              }
+              setCheckTrigger(prev => prev + 1);
+              alert("Проверка уведомлений запущена. Если есть просроченные задачи, они будут отправлены в Telegram.");
+            }} 
+            variant="outline" 
+            className="text-slate-600"
+            title="Проверить и отправить уведомления"
+          >
+            <Bell className="h-4 w-4 mr-2" />
+            Уведомления
+          </Button>
+          <Button onClick={addTask} disabled={project.tasks.length >= 5} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Добавить задачу
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -112,7 +177,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 pt-3 border-t border-slate-100">
+                <div className="grid grid-cols-2 md:grid-cols-7 gap-3 pt-3 border-t border-slate-100">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Дата начала</label>
                     <Input type="date" value={task.startDate || ''} onChange={e => updateTask(task.id, { startDate: e.target.value })} className="h-8 text-xs border-slate-200" />
@@ -149,6 +214,10 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">След. проверка</label>
                     <Input type="date" value={task.nextCheckDate || ''} onChange={e => updateTask(task.id, { nextCheckDate: e.target.value })} className="h-8 text-xs border-slate-200" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-semibold text-slate-500">Ссылка на ТЗ</label>
+                    <Input value={task.docLink || ''} onChange={e => updateTask(task.id, { docLink: e.target.value })} placeholder="https://..." className="h-8 text-xs border-slate-200" />
                   </div>
                 </div>
 

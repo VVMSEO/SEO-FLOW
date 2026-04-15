@@ -71,12 +71,18 @@ export function CompletedTab({ project, updateProject }: Props) {
                     />
                   </div>
                   
-                  <div className="flex-1 w-full">
+                  <div className="flex-1 w-full space-y-2">
                     <Textarea 
                       value={item.name} 
                       onChange={e => updateItem(item.id, { name: e.target.value })} 
                       placeholder="Название закрытой задачи..." 
                       className="min-h-[40px] text-sm font-semibold border-slate-200 focus-visible:ring-blue-600 resize-y"
+                    />
+                    <Input 
+                      value={item.docLink || ''} 
+                      onChange={e => updateItem(item.id, { docLink: e.target.value })} 
+                      placeholder="Ссылка на ТЗ/Документ..."
+                      className="h-8 text-xs border-slate-200 bg-slate-50"
                     />
                   </div>
                   

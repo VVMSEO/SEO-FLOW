@@ -128,6 +128,15 @@ export function LogTab({ project, updateProject }: Props) {
                       />
                     </div>
                     <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Ссылка на ТЗ/Документ</label>
+                      <Input 
+                        value={item.docLink || ''} 
+                        onChange={e => updateItem(item.id, { docLink: e.target.value })} 
+                        placeholder="https://..."
+                        className="h-9 text-sm border-slate-200 focus-visible:ring-blue-600"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
                       <label className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Строка для отчёта</label>
                       <Textarea 
                         value={item.reportString} 
