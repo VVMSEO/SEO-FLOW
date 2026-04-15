@@ -115,11 +115,11 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-3 pt-3 border-t border-slate-100">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Дата начала</label>
-                    <Input type="date" value={task.startDate || ''} onChange={e => updateTask(task.id, { startDate: e.target.value })} className="h-7 text-xs border-slate-200" />
+                    <Input type="date" value={task.startDate || ''} onChange={e => updateTask(task.id, { startDate: e.target.value })} className="h-8 text-xs border-slate-200" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Слой</label>
-                    <Select value={task.layer} onChange={e => updateTask(task.id, { layer: e.target.value as TaskLayer })} className="h-7 text-xs border-slate-200">
+                    <Select value={task.layer} onChange={e => updateTask(task.id, { layer: e.target.value as TaskLayer })} className="h-8 text-xs border-slate-200">
                       <option value="Техничка">Техничка</option>
                       <option value="Индексация">Индексация</option>
                       <option value="Структура">Структура</option>
@@ -131,7 +131,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Приоритет</label>
-                    <Select value={task.priority} onChange={e => updateTask(task.id, { priority: e.target.value as TaskPriority })} className="h-7 text-xs border-slate-200">
+                    <Select value={task.priority} onChange={e => updateTask(task.id, { priority: e.target.value as TaskPriority })} className="h-8 text-xs border-slate-200">
                       <option value="A">A - Авария</option>
                       <option value="B">B - Блокер роста</option>
                       <option value="C">C - Усилитель</option>
@@ -140,15 +140,15 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Ответственный</label>
-                    <Input value={task.assignee} onChange={e => updateTask(task.id, { assignee: e.target.value })} className="h-7 text-xs border-slate-200" />
+                    <Input value={task.assignee} onChange={e => updateTask(task.id, { assignee: e.target.value })} className="h-8 text-xs border-slate-200" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">Срок</label>
-                    <Input type="date" value={task.deadline || ''} onChange={e => updateTask(task.id, { deadline: e.target.value })} className="h-7 text-xs border-slate-200" />
+                    <Input type="date" value={task.deadline || ''} onChange={e => updateTask(task.id, { deadline: e.target.value })} className="h-8 text-xs border-slate-200" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-semibold text-slate-500">След. проверка</label>
-                    <Input type="date" value={task.nextCheckDate || ''} onChange={e => updateTask(task.id, { nextCheckDate: e.target.value })} className="h-7 text-xs border-slate-200" />
+                    <Input type="date" value={task.nextCheckDate || ''} onChange={e => updateTask(task.id, { nextCheckDate: e.target.value })} className="h-8 text-xs border-slate-200" />
                   </div>
                 </div>
 
