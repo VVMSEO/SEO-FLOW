@@ -35,6 +35,7 @@ export function exportProjectToExcel(project: Project) {
     'Фактическая дата': t.factDate || '',
     'Что проверить': t.whatToCheck,
     'Следующая проверка': t.nextCheckDate || '',
+    'Ссылка на ТЗ': t.docLink || '',
   }));
   const wsTasks = XLSX.utils.json_to_sheet(tasksData);
   XLSX.utils.book_append_sheet(wb, wsTasks, 'Текущая работа');
@@ -66,6 +67,7 @@ export function exportProjectToExcel(project: Project) {
     'Зачем': l.why,
     'Что проверить': l.whatToCheck,
     'Статус эффекта': l.effectStatus,
+    'Ссылка на ТЗ': l.docLink || '',
     'Отчет': l.reportString,
     'Следующая проверка': l.nextCheckDate || '',
     'Комментарий': l.comment || '',
@@ -82,10 +84,24 @@ export function exportProjectToExcel(project: Project) {
     'Ответственный': c.assignee,
     'Результат': c.result,
     'Что проверить': c.whatToCheck || '',
+    'Ссылка на ТЗ': c.docLink || '',
     'Комментарий': c.comment || '',
   }));
   const wsCompleted = XLSX.utils.json_to_sheet(completedData);
   XLSX.utils.book_append_sheet(wb, wsCompleted, 'Завершённое');
+
+  // 6. Daily Log (Micro-actions)
+  if (project.dailyLog && project.dailyLog.length > 0) {
+    const dailyLogData = project.dailyLog.map(d => ({
+      'Дата': d.date,
+      'Категория': d.category,
+      'Что сделано': d.description,
+      'URL (Страницы)': d.url || '',
+      'Затрачено времени': d.timeSpent || '',
+    }));
+    const wsDailyLog = XLSX.utils.json_to_sheet(dailyLogData);
+    XLSX.utils.book_append_sheet(wb, wsDailyLog, 'Дневник (Микрозадачи)');
+  }
 
   // Export
   XLSX.writeFile(wb, `${project.name}_export_${new Date().toISOString().split('T')[0]}.xlsx`);
