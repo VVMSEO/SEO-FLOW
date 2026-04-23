@@ -1,11 +1,11 @@
 import React from 'react';
-import { Project, CompletedItem, TaskLayer, TaskPriority, CompletedResult } from '../../types';
+import { Project, CompletedItem, TaskLayer, TaskPriority, CompletedResult, Task } from '../../types';
 import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ArrowUpLeft } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
@@ -37,6 +37,30 @@ export function CompletedTab({ project, updateProject }: Props) {
 
   const removeItem = (itemId: string) => {
     updateProject(project.id, { completed: project.completed.filter(i => i.id !== itemId) });
+  };
+
+  const returnToCurrent = (item: CompletedItem) => {
+    if (project.tasks.length >= 5) {
+      alert("WIP-лимит: не больше 5 активных задач одновременно.");
+      return;
+    }
+    
+    const newTask: Task = {
+      id: uuidv4(),
+      name: item.name,
+      layer: item.layer,
+      priority: item.priority || 'C',
+      assignee: item.assignee,
+      status: 'В работе',
+      startDate: new Date().toISOString().split('T')[0],
+      whatToCheck: item.whatToCheck || '',
+      docLink: item.docLink
+    };
+    
+    updateProject(project.id, { 
+      tasks: [...project.tasks, newTask],
+      completed: project.completed.filter(i => i.id !== item.id)
+    });
   };
 
   return (
@@ -86,11 +110,11 @@ export function CompletedTab({ project, updateProject }: Props) {
                     />
                   </div>
                   
-                  <div className="flex gap-2 w-full md:w-auto shrink-0">
+                  <div className="flex gap-2 w-full md:w-auto shrink-0 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
                     <Select 
                       value={item.layer} 
                       onChange={e => updateItem(item.id, { layer: e.target.value as TaskLayer })} 
-                      className="h-9 text-xs w-32 border-slate-200 bg-slate-50"
+                      className="h-9 text-xs w-28 border-slate-200 bg-white"
                     >
                       <option value="Техничка">Техничка</option>
                       <option value="Индексация">Индексация</option>
@@ -104,7 +128,7 @@ export function CompletedTab({ project, updateProject }: Props) {
                     <Select 
                       value={item.result} 
                       onChange={e => updateItem(item.id, { result: e.target.value as CompletedResult })} 
-                      className="h-9 text-xs w-48 border-slate-200 bg-slate-50"
+                      className="h-9 text-xs w-40 border-slate-200 bg-white"
                     >
                       <option value="Выполнено">Выполнено</option>
                       <option value="Частично выполнено">Частично выполнено</option>
@@ -114,7 +138,12 @@ export function CompletedTab({ project, updateProject }: Props) {
                       <option value="Передано разработчику">Передано разработчику</option>
                     </Select>
                     
-                    <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} className="h-9 w-9 text-red-500 hover:text-red-600 hover:bg-red-50">
+                    <div className="w-px h-6 bg-slate-200 mx-1 self-center"></div>
+                    
+                    <Button variant="ghost" size="icon" onClick={() => returnToCurrent(item)} title="Заново взять в 'Текущую работу'" className="h-9 w-9 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                      <ArrowUpLeft className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} title="Удалить навсегда" className="h-9 w-9 text-red-500 hover:text-red-600 hover:bg-red-50">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

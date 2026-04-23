@@ -6,7 +6,7 @@ import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Badge } from '../ui/Badge';
-import { Plus, Trash2, CheckCircle2, Bell } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Bell, ArrowDownToLine, CheckSquare } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { cn } from '../../lib/utils';
 import { sendTelegramMessage } from '../../lib/telegram';
@@ -92,9 +92,46 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
     updateProject(project.id, { tasks: project.tasks.filter(t => t.id !== taskId) });
   };
 
-  const completeTask = (task: Task) => {
-    // Move to journal and completed logic would go here, but for now we just change status
-    updateTask(task.id, { status: 'Сделано', factDate: new Date().toISOString().split('T')[0] });
+  const moveToCompleted = (task: Task) => {
+    const newItem = {
+      id: uuidv4(),
+      date: new Date().toISOString().split('T')[0],
+      name: task.name,
+      layer: task.layer,
+      priority: task.priority,
+      assignee: task.assignee,
+      result: 'Выполнено' as const,
+      whatToCheck: task.whatToCheck,
+      docLink: task.docLink
+    };
+    updateProject(project.id, {
+      completed: [newItem, ...project.completed],
+      tasks: project.tasks.filter(t => t.id !== task.id)
+    });
+  };
+
+  const moveToQueue = (task: Task) => {
+    const newItem = {
+      id: uuidv4(),
+      addedDate: new Date().toISOString().split('T')[0],
+      source: 'Из тек. работы',
+      name: task.name,
+      layer: task.layer,
+      impact: 0,
+      urgency: 0,
+      dependency: 0,
+      dataConfirmation: 0,
+      effort: 0,
+      priority: 0,
+      decision: 'Отложить' as const,
+      status: 'Заморожена' as const,
+      whenToTake: '',
+      url: task.docLink
+    };
+    updateProject(project.id, {
+      queue: [newItem, ...project.queue],
+      tasks: project.tasks.filter(t => t.id !== task.id)
+    });
   };
 
   return (
