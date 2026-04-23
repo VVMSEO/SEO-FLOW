@@ -135,31 +135,41 @@ export function QueueTab({ project, updateProject }: Props) {
                       <Input value={item.whenToTake} onChange={e => updateItem(item.id, { whenToTake: e.target.value })} placeholder="Ориентир..." className="h-8 text-xs border-slate-200 bg-slate-50" />
                     </div>
                   </div>
+                  <div className="mt-3 space-y-1.5">
+                    <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider flex items-center justify-between">
+                      URL
+                      <span className="text-slate-400 font-normal lowercase">необязательно</span>
+                    </label>
+                    <Input value={item.url || ''} onChange={e => updateItem(item.id, { url: e.target.value })} placeholder="https://..." className="h-8 text-xs border-slate-200 bg-slate-50" />
+                  </div>
                 </div>
                 
                 {/* Scoring */}
                 <div className="w-full md:w-72 p-5 bg-slate-50 flex flex-col justify-between">
-                  <div className="grid grid-cols-5 gap-2 text-center mb-4">
-                    <div title="Влияние (0-2)">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5">Влиян</label>
+                  <div className="grid grid-cols-5 gap-2 text-center mb-1">
+                    <div title="Влияние на результат: 0 - низкое, 1 - среднее, 2 - высокое">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5 cursor-help border-b border-dashed border-slate-300">Влиян</label>
                       <Input type="number" min="0" max="2" value={item.impact} onChange={e => updateItem(item.id, { impact: parseInt(e.target.value) || 0 })} className="h-8 text-sm px-1 text-center font-medium border-slate-200 bg-white" />
                     </div>
-                    <div title="Срочность (0-2)">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5">Срочн</label>
+                    <div title="Срочность: 0 - ждет, 1 - скоро, 2 - сейчас">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5 cursor-help border-b border-dashed border-slate-300">Срочн</label>
                       <Input type="number" min="0" max="2" value={item.urgency} onChange={e => updateItem(item.id, { urgency: parseInt(e.target.value) || 0 })} className="h-8 text-sm px-1 text-center font-medium border-slate-200 bg-white" />
                     </div>
-                    <div title="Зависимость (0-2)">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5">Завис</label>
+                    <div title="Зависимость: 0 - нет, 1 - частично, 2 - блокирует">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5 cursor-help border-b border-dashed border-slate-300">Завис</label>
                       <Input type="number" min="0" max="2" value={item.dependency} onChange={e => updateItem(item.id, { dependency: parseInt(e.target.value) || 0 })} className="h-8 text-sm px-1 text-center font-medium border-slate-200 bg-white" />
                     </div>
-                    <div title="Подтверждение данными (0-2)">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5">Данн</label>
+                    <div title="Подтверждение: 0 - гипотеза, 1 - косвенно, 2 - точные">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5 cursor-help border-b border-dashed border-slate-300">Данн</label>
                       <Input type="number" min="0" max="2" value={item.dataConfirmation} onChange={e => updateItem(item.id, { dataConfirmation: parseInt(e.target.value) || 0 })} className="h-8 text-sm px-1 text-center font-medium border-slate-200 bg-white" />
                     </div>
-                    <div title="Трудозатраты (0-2)">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5">Труд</label>
+                    <div title="Трудозатраты: 0 - легко, 1 - средне, 2 - сложно">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1.5 cursor-help border-b border-dashed border-slate-300">Труд</label>
                       <Input type="number" min="0" max="2" value={item.effort} onChange={e => updateItem(item.id, { effort: parseInt(e.target.value) || 0 })} className="h-8 text-sm px-1 text-center font-medium border-slate-200 bg-white" />
                     </div>
+                  </div>
+                  <div className="text-[10px] text-slate-400 leading-tight mb-4 text-center">
+                    Оценка от 0 до 2.<br/>Наведите на заголовки для подсказки.
                   </div>
                   <div className="flex items-center justify-between mt-auto">
                     <div className="text-xs font-bold uppercase tracking-wide text-slate-500">

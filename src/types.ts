@@ -62,6 +62,7 @@ export interface QueueItem {
   source: string;
   name: string;
   layer: TaskLayer;
+  url?: string;
   impact: number; // 0-2
   urgency: number; // 0-2
   dependency: number; // 0-2
