@@ -8,6 +8,7 @@ export type QueueStatus = 'Новая' | 'В очереди' | 'Запланир
 export type EffectStatus = 'Сделано' | 'Ожидается переобход' | 'Ожидается индексация' | 'Ожидается накопление данных' | 'Проверить повторно' | 'Требуется доработка';
 export type CompletedResult = 'Выполнено' | 'Частично выполнено' | 'Закрыто без внедрения' | 'Отменено' | 'Передано клиенту' | 'Передано разработчику';
 export type DailyLogCategory = 'Аналитика/Вебмастер' | 'Метатеги' | 'Контент' | 'Тех. правки' | 'Ссылки' | 'Прочее';
+export type PaymentStatus = 'Не оплачен' | 'Ожидает оплаты' | 'Счет отправлен' | 'Оплачен' | 'Чек отправлен';
 
 export interface Project {
   id: string;
@@ -25,11 +26,16 @@ export interface Project {
   lastUpdated: string;
   telegramBotToken?: string;
   telegramChatId?: string;
+  paymentStatus?: PaymentStatus;
+  paymentDate?: string;
+  invoiceDate?: string;
+  receiptDate?: string;
   tasks: Task[];
   queue: QueueItem[];
   log: LogItem[];
   completed: CompletedItem[];
   dailyLog?: DailyLogItem[];
+  accesses?: AccessItem[];
 }
 
 export interface Task {
@@ -101,4 +107,14 @@ export interface DailyLogItem {
   description: string;
   url?: string;
   timeSpent?: string;
+}
+
+export interface AccessItem {
+  id: string;
+  title: string;
+  category: string;
+  url?: string;
+  login?: string;
+  password?: string;
+  comment?: string;
 }

@@ -85,6 +85,34 @@ export function OverviewTab({ project, updateProject }: Props) {
       </div>
 
       <Card className="p-5 mt-4 border-slate-200">
+        <h3 className="text-sm font-bold mb-4 uppercase tracking-wide text-slate-700">Биллинг и Оплата</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Статус оплаты</label>
+            <Select value={project.paymentStatus || 'Не оплачен'} onChange={e => handleChange('paymentStatus', e.target.value)} className="font-semibold text-sm border-slate-200 focus:ring-1 focus:ring-blue-600">
+              <option value="Не оплачен">Не оплачен</option>
+              <option value="Ожидает оплаты">Ожидает оплаты</option>
+              <option value="Счет отправлен">Счет отправлен</option>
+              <option value="Оплачен">Оплачен</option>
+              <option value="Чек отправлен">Чек отправлен</option>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Дата выставления счета</label>
+            <Input type="date" value={project.invoiceDate || ''} onChange={e => handleChange('invoiceDate', e.target.value)} className="text-sm border-slate-200" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Дата оплаты</label>
+            <Input type="date" value={project.paymentDate || ''} onChange={e => handleChange('paymentDate', e.target.value)} className="text-sm border-slate-200" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Дата отправки чека</label>
+            <Input type="date" value={project.receiptDate || ''} onChange={e => handleChange('receiptDate', e.target.value)} className="text-sm border-slate-200" />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-5 mt-4 border-slate-200">
         <h3 className="text-sm font-bold mb-4 uppercase tracking-wide text-slate-700">Настройки Telegram уведомлений</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">

@@ -9,11 +9,12 @@ import { QueueTab } from './tabs/QueueTab';
 import { LogTab } from './tabs/LogTab';
 import { CompletedTab } from './tabs/CompletedTab';
 import { DailyLogTab } from './tabs/DailyLogTab';
+import { AccessesTab } from './tabs/AccessesTab';
 import { User, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { exportProjectToExcel } from '../lib/exportExcel';
 
-type TabType = 'overview' | 'current' | 'queue' | 'log' | 'completed' | 'dailylog';
+type TabType = 'overview' | 'accesses' | 'current' | 'queue' | 'log' | 'completed' | 'dailylog';
 
 export function AppLayout({ user }: { user: User }) {
   const { projects, activeProject, activeProjectId, setActiveProjectId, addProject, updateProject } = useProjects(user.uid);
@@ -121,6 +122,7 @@ export function AppLayout({ user }: { user: User }) {
               
               <div className="flex h-full overflow-x-auto whitespace-nowrap hide-scrollbar">
                 <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Обзор</TabButton>
+                <TabButton active={activeTab === 'accesses'} onClick={() => setActiveTab('accesses')}>Доступы</TabButton>
                 <TabButton active={activeTab === 'current'} onClick={() => setActiveTab('current')}>Текущая работа</TabButton>
                 <TabButton active={activeTab === 'dailylog'} onClick={() => setActiveTab('dailylog')}>Лента действий</TabButton>
                 <TabButton active={activeTab === 'queue'} onClick={() => setActiveTab('queue')}>Очередь</TabButton>
@@ -133,6 +135,7 @@ export function AppLayout({ user }: { user: User }) {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="max-w-5xl mx-auto">
                 {activeTab === 'overview' && <OverviewTab project={activeProject} updateProject={updateProject} />}
+                {activeTab === 'accesses' && <AccessesTab project={activeProject} updateProject={updateProject} />}
                 {activeTab === 'current' && <CurrentWorkTab project={activeProject} updateProject={updateProject} />}
                 {activeTab === 'dailylog' && <DailyLogTab project={activeProject} updateProject={updateProject} />}
                 {activeTab === 'queue' && <QueueTab project={activeProject} updateProject={updateProject} />}

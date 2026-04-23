@@ -18,10 +18,27 @@ export function exportProjectToExcel(project: Project) {
     ['Фокус', project.focus],
     ['Узкое место', project.bottleneck],
     ['Следующий шаг', project.nextStep],
+    ['Статус оплаты', project.paymentStatus || ''],
+    ['Дата выставления счета', project.invoiceDate || ''],
+    ['Дата оплаты', project.paymentDate || ''],
+    ['Дата отправки чека', project.receiptDate || ''],
     ['Последнее обновление', project.lastUpdated],
   ];
   const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
   XLSX.utils.book_append_sheet(wb, wsOverview, 'Обзор');
+
+  // 1.5 Accesses
+  if (project.accesses && project.accesses.length > 0) {
+    const accessesData = project.accesses.map(a => ({
+      'Название': a.title,
+      'Категория': a.category,
+      'Ссылка': a.url || '',
+      'Логин': a.login || '',
+      'Комментарий': a.comment || ''
+    }));
+    const wsAccesses = XLSX.utils.json_to_sheet(accessesData);
+    XLSX.utils.book_append_sheet(wb, wsAccesses, 'Доступы');
+  }
 
   // 2. Current Work
   const tasksData = project.tasks.map(t => ({
