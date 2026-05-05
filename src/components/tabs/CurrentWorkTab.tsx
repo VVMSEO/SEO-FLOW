@@ -196,8 +196,8 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                       className="font-semibold text-sm min-h-[40px] py-1 px-0 border-none shadow-none focus-visible:ring-0 resize-y"
                     />
                   </div>
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <Select value={task.status} onChange={e => updateTask(task.id, { status: e.target.value as TaskStatus })} className="w-40 h-8 text-xs border-slate-200">
+                  <div className="flex items-center space-x-1 shrink-0 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                    <Select value={task.status} onChange={e => updateTask(task.id, { status: e.target.value as TaskStatus })} className="w-36 h-8 text-xs border-slate-200">
                       <option value="Сделать сейчас">Сделать сейчас</option>
                       <option value="В работе">В работе</option>
                       <option value="Ждёт клиента">Ждёт клиента</option>
@@ -208,7 +208,14 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                       <option value="Сделано">Сделано</option>
                       <option value="Отменено">Отменено</option>
                     </Select>
-                    <Button variant="ghost" size="icon" onClick={() => removeTask(task.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 w-8">
+                    <div className="w-px h-6 bg-slate-200 mx-1"></div>
+                    <Button variant="ghost" size="icon" onClick={() => moveToCompleted(task)} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8" title="Перенести в 'Завершенные'">
+                      <CheckSquare className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => moveToQueue(task)} className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-8 w-8" title="Вернуть в 'Очередь'">
+                      <ArrowDownToLine className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => removeTask(task.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 w-8" title="Удалить навсегда">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
