@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Project } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { db, auth } from '../firebase';
-import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy } from 'firebase/firestore';
 
 enum OperationType {
   CREATE = 'create',
@@ -55,7 +55,8 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
-export function useProjects(userId: string) {
+export function useProjects(userIdParams?: string) {
+  const userId = userIdParams || auth.currentUser?.uid || '';
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(() => {
     return localStorage.getItem(`seo_active_project_${userId}`) || null;
@@ -77,6 +78,8 @@ export function useProjects(userId: string) {
           completed: data.completed ? JSON.parse(data.completed) : []
         } as Project);
       });
+      // Sort on client to avoid composite index requirement
+      projectsData.sort((a, b) => a.name.localeCompare(b.name));
       setProjects(projectsData);
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, 'projects');
@@ -93,14 +96,18 @@ export function useProjects(userId: string) {
     }
   }, [activeProjectId, userId]);
 
-  const addProject = async (name: string) => {
+  const addProject = async (data: string | (Partial<Project> & { name: string })) => {
+    const name = typeof data === 'string' ? data : data.name;
     const newProject: Project = {
       id: uuidv4(),
       name,
       domain: '',
       niche: '',
       region: '',
-      budget: '',
+      budget: '0',
+      overhead: 1,
+      active: true,
+      createdAt: new Date().toISOString(),
       kpi: '',
       status: 'Зелёный',
       stage: 'Диагностика',
@@ -111,7 +118,8 @@ export function useProjects(userId: string) {
       tasks: [],
       queue: [],
       log: [],
-      completed: []
+      completed: [],
+      ...(typeof data === 'object' ? data : {})
     };
 
     const projectData = {

@@ -8,6 +8,8 @@ import { AppLayout } from './components/AppLayout';
 import { auth } from './firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
 import { Button } from './components/ui/Button';
+import { TimerProvider } from './context/TimerContext';
+import { Toaster } from 'sonner';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -52,5 +54,10 @@ export default function App() {
     );
   }
 
-  return <AppLayout user={user} />;
+  return (
+    <TimerProvider>
+      <AppLayout user={user} />
+      <Toaster position="top-center" richColors />
+    </TimerProvider>
+  );
 }

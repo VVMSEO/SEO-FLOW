@@ -6,10 +6,13 @@ import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Badge } from '../ui/Badge';
-import { Plus, Trash2, CheckCircle2, Bell, ArrowDownToLine, CheckSquare } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Bell, ArrowDownToLine, CheckSquare, Play, Square } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { cn } from '../../lib/utils';
 import { sendTelegramMessage } from '../../lib/telegram';
+import { useTimer } from '../../context/TimerContext';
+import { useTimeLogs } from '../../hooks/useTimeLogs';
+import { LiveTimerDisplay } from '../ui/LiveTimerDisplay';
 
 interface Props {
   project: Project;
@@ -19,6 +22,8 @@ interface Props {
 export function CurrentWorkTab({ project, updateProject }: Props) {
   const hasCheckedReminders = useRef(false);
   const [checkTrigger, setCheckTrigger] = useState(0);
+  const { activeTimer, startTimer, stopTimer } = useTimer();
+  const { logs, addLog, updateLog: updateTimeLog } = useTimeLogs();
 
   useEffect(() => {
     if (hasCheckedReminders.current && checkTrigger === 0) return;
@@ -134,6 +139,40 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
     });
   };
 
+  const handleToggleTimer = async (task: Task) => {
+    // If tracking this exact task, stop it
+    if (activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name) {
+      await stopTimer();
+      return;
+    }
+
+    // Stop current timer if any
+    if (activeTimer) {
+      await stopTimer();
+    }
+
+    // 1. Try to find a TimeLog for today for this project and task
+    const today = new Date().toISOString().split('T')[0];
+    let logToUse = logs.find(l => l.date === today && l.projectId === project.id && l.task === task.name);
+    
+    // 2. If no log exists or we don't have an exact match by task name, maybe find a log with empty task? Let's just create one.
+    if (!logToUse) {
+      logToUse = await addLog({
+        projectId: project.id,
+        projectName: project.name,
+        date: today,
+        task: task.name || '',
+        status: 'В работе',
+        minutes: 0,
+        workedMinutes: 0
+      }) as any;
+    }
+
+    if (logToUse) {
+      startTimer(logToUse);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -171,23 +210,43 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
             <p className="text-slate-500">Нет активных задач. Возьмите задачу из очереди или создайте новую.</p>
           </div>
         ) : (
-          project.tasks.map(task => (
-            <Card key={task.id} className={cn("overflow-hidden", task.status === 'Сделано' ? 'opacity-60' : '')}>
-              <div className="p-4 border-b border-slate-100 bg-white">
+          project.tasks.map(task => {
+            const isActive = activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name;
+            
+            return (
+            <Card key={task.id} className={cn("overflow-hidden", task.status === 'Сделано' ? 'opacity-60' : '', isActive ? 'ring-2 ring-red-400 bg-red-50/20' : '')}>
+              <div className={cn("p-4 border-b border-slate-100", isActive ? 'bg-red-50/40' : 'bg-white')}>
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
-                    <div className="mb-2">
-                      <span className={cn(
-                        "text-[10px] uppercase px-2 py-1 rounded font-bold inline-block",
-                        task.status === 'В работе' ? "bg-blue-100 text-blue-600" :
-                        task.status === 'Ждёт клиента' ? "bg-orange-50 text-orange-600" :
-                        task.status === 'Проверка результата' ? "bg-emerald-50 text-emerald-600" :
-                        task.status === 'Сделано' ? "bg-slate-100 text-slate-500" :
-                        task.status === 'Сделать сейчас' ? "bg-blue-50 text-blue-700" :
-                        "bg-slate-100 text-slate-600"
-                      )}>
-                        {task.status}
-                      </span>
+                    <div className="mb-2 flex items-center gap-2">
+                      {isActive ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 uppercase tracking-wide bg-red-100 border border-red-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                          В процессе
+                        </span>
+                      ) : (
+                        <span className={cn(
+                          "text-[10px] uppercase px-2 py-1 rounded font-bold inline-block border",
+                          task.status === 'В работе' ? "bg-blue-100 text-blue-600 border-blue-200" :
+                          task.status === 'Ждёт клиента' ? "bg-orange-50 text-orange-600 border-orange-200" :
+                          task.status === 'Проверка результата' ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
+                          task.status === 'Сделано' ? "bg-slate-100 text-slate-500 border-slate-200" :
+                          task.status === 'Сделать сейчас' ? "bg-blue-50 text-blue-700 border-blue-200" :
+                          "bg-slate-100 text-slate-600 border-slate-200"
+                        )}>
+                          {task.status}
+                        </span>
+                      )}
+                      
+                      {isActive && activeTimer && (
+                        <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium">
+                          <span>Факт:</span>
+                          <LiveTimerDisplay startTime={activeTimer.startTime} initialMinutes={activeTimer.initialWorkedMinutes} />
+                          <span className="text-red-500 text-xs flex items-center ml-1">
+                            ⏱ Идет отсчет...
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <Textarea 
                       value={task.name} 
@@ -208,6 +267,25 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                       <option value="Сделано">Сделано</option>
                       <option value="Отменено">Отменено</option>
                     </Select>
+                    <div className="w-px h-6 bg-slate-200 mx-1"></div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleToggleTimer(task)} 
+                      className={cn(
+                        "h-8 w-8 hover:bg-slate-200", 
+                        activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name
+                          ? "bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700" 
+                          : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      )} 
+                      title={activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name ? "Остановить таймер" : "Запустить таймер"}
+                    >
+                      {activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name ? (
+                        <Square className="h-4 w-4" fill="currentColor" />
+                      ) : (
+                        <Play className="h-4 w-4" fill="currentColor" />
+                      )}
+                    </Button>
                     <div className="w-px h-6 bg-slate-200 mx-1"></div>
                     <Button variant="ghost" size="icon" onClick={() => moveToCompleted(task)} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8" title="Перенести в 'Завершенные'">
                       <CheckSquare className="h-4 w-4" />
@@ -271,7 +349,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                 </div>
               </div>
             </Card>
-          ))
+          )})
         )}
       </div>
     </div>

@@ -17,6 +17,10 @@ export interface Project {
   niche: string;
   region: string;
   budget: string;
+  overhead?: number;
+  active?: boolean;
+  createdAt?: string;
+  userId?: string;
   kpi: string;
   status: ProjectStatus;
   stage: ProjectStage;
