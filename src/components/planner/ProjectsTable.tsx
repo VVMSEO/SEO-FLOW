@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useProjects } from '../../hooks/useProjects';
 import { useTimeLogs } from '../../hooks/useTimeLogs';
 import { useSettings } from '../../hooks/useSettings';
 import { formatMinutes } from '../../utils/timeCalc';
 import { startOfWeek, endOfWeek, parseISO, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns';
+import { Badge } from '../ui/Badge';
 
 export default function ProjectsTable({ onSelectProject }: { onSelectProject?: (id: string) => void }) {
   const { projects } = useProjects('');
   const { logs } = useTimeLogs();
   const { settings } = useSettings();
+  const [showArchived, setShowArchived] = useState(false);
 
   const now = new Date();
   const wStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -17,7 +19,7 @@ export default function ProjectsTable({ onSelectProject }: { onSelectProject?: (
   const mEnd = endOfMonth(now);
 
   const stats = useMemo(() => {
-    return projects.filter((p: any) => p.active !== false).map((p: any) => {
+    return projects.filter((p: any) => showArchived ? true : p.active !== false).map((p: any) => {
       const budget = Number(p.budget) || 0;
       const hourlyRate = Number(settings?.hourlyRate) || 1;
       const mult = Number(p.overhead) || 1;
@@ -51,7 +53,18 @@ export default function ProjectsTable({ onSelectProject }: { onSelectProject?: (
 
   return (
     <div className="p-8 max-w-[1200px] mx-auto w-full space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6 font-sans">Проекты (План / Факт)</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-slate-900 font-sans">Проекты (План / Факт)</h1>
+        <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          Показывать архивные
+        </label>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left whitespace-nowrap font-sans">
@@ -71,13 +84,20 @@ export default function ProjectsTable({ onSelectProject }: { onSelectProject?: (
             {stats.map(s => (
               <tr key={s.id} className="hover:bg-slate-50 transition-colors">
                 <td className="py-4 pr-6 font-medium text-slate-900">
-                  <button 
-                    onClick={() => onSelectProject && onSelectProject(s.id)}
-                    className="hover:text-blue-600 focus:outline-none transition-colors text-left"
-                    title="Перейти в карточку проекта"
-                  >
-                    {s.name}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => onSelectProject && onSelectProject(s.id)}
+                      className="hover:text-blue-600 focus:outline-none transition-colors text-left"
+                      title="Перейти в карточку проекта"
+                    >
+                      {s.name}
+                    </button>
+                    {s.active === false && (
+                      <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider py-0 px-1.5 opacity-70">
+                        Архив
+                      </Badge>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-6 text-slate-600">{s.budget}</td>
                 <td className="py-4 px-6 text-slate-600">{formatMinutes(s.planWeekMins)}</td>

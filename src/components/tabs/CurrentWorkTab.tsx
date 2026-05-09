@@ -13,6 +13,7 @@ import { sendTelegramMessage } from '../../lib/telegram';
 import { useTimer } from '../../context/TimerContext';
 import { useTimeLogs } from '../../hooks/useTimeLogs';
 import { LiveTimerDisplay } from '../ui/LiveTimerDisplay';
+import { useSettings } from '../../hooks/useSettings';
 
 interface Props {
   project: Project;
@@ -24,10 +25,11 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
   const [checkTrigger, setCheckTrigger] = useState(0);
   const { activeTimer, startTimer, stopTimer } = useTimer();
   const { logs, addLog, updateLog: updateTimeLog } = useTimeLogs();
+  const { settings } = useSettings();
 
   useEffect(() => {
     if (hasCheckedReminders.current && checkTrigger === 0) return;
-    if (!project.telegramBotToken || !project.telegramChatId) return;
+    if (!settings?.tgToken || !settings?.tgChatId) return;
 
     const checkAndSendReminders = async () => {
       hasCheckedReminders.current = true;
@@ -42,7 +44,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
         // Check Overdue
         if (task.deadline && task.deadline < today && task.lastOverdueReminder !== today) {
           const msg = `⚠️ <b>Просроченная задача!</b>\n\n<b>Проект:</b> ${project.name}\n<b>Задача:</b> ${task.name}\n<b>Дедлайн:</b> ${task.deadline}\n<b>Ответственный:</b> ${task.assignee}`;
-          const success = await sendTelegramMessage(project.telegramBotToken!, project.telegramChatId!, msg);
+          const success = await sendTelegramMessage(settings.tgToken, settings.tgChatId, msg);
           if (success) {
             updatedTasks[i] = { ...updatedTasks[i], lastOverdueReminder: today };
             hasUpdates = true;
@@ -52,7 +54,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
         // Check Next Check Date
         if (task.nextCheckDate && task.nextCheckDate <= today && task.lastCheckReminder !== today) {
           const msg = `🔍 <b>Пора проверить задачу!</b>\n\n<b>Проект:</b> ${project.name}\n<b>Задача:</b> ${task.name}\n<b>Что проверить:</b> ${task.whatToCheck || 'Не указано'}`;
-          const success = await sendTelegramMessage(project.telegramBotToken!, project.telegramChatId!, msg);
+          const success = await sendTelegramMessage(settings.tgToken, settings.tgChatId, msg);
           if (success) {
             updatedTasks[i] = { ...updatedTasks[i], lastCheckReminder: today };
             hasUpdates = true;
@@ -66,7 +68,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
     };
 
     checkAndSendReminders();
-  }, [project.id, project.telegramBotToken, project.telegramChatId, project.tasks, project.name, updateProject, checkTrigger]);
+  }, [project.id, settings?.tgToken, settings?.tgChatId, project.tasks, project.name, updateProject, checkTrigger]);
 
   const addTask = () => {
     if (project.tasks.length >= 5) {
@@ -183,8 +185,8 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
         <div className="flex gap-2">
           <Button 
             onClick={() => {
-              if (!project.telegramBotToken || !project.telegramChatId) {
-                alert("Сначала настройте Telegram Bot Token и Chat ID во вкладке 'Обзор'");
+              if (!settings?.tgToken || !settings?.tgChatId) {
+                alert("Сначала настройте Telegram Bot Token и Chat ID во вкладке 'Обзор' или в глобальных настройках");
                 return;
               }
               setCheckTrigger(prev => prev + 1);

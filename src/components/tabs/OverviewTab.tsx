@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Project } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Textarea } from '../ui/Textarea';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { useSettings } from '../../hooks/useSettings';
 
 interface Props {
   project: Project;
@@ -12,6 +14,24 @@ interface Props {
 }
 
 export function OverviewTab({ project, updateProject }: Props) {
+  const { settings, updateSettings } = useSettings();
+  const [tgToken, setTgToken] = useState('');
+  const [tgChatId, setTgChatId] = useState('');
+
+  useEffect(() => {
+    if (settings) {
+      setTgToken(settings.tgToken || '');
+      setTgChatId(settings.tgChatId || '');
+    }
+  }, [settings]);
+
+  const handleSaveSettings = () => {
+    updateSettings({
+      tgToken,
+      tgChatId
+    });
+  };
+
   const handleChange = (field: keyof Project, value: any) => {
     updateProject(project.id, { [field]: value });
   };
@@ -113,20 +133,46 @@ export function OverviewTab({ project, updateProject }: Props) {
       </Card>
 
       <Card className="p-5 mt-4 border-slate-200">
-        <h3 className="text-sm font-bold mb-4 uppercase tracking-wide text-slate-700">Настройки Telegram уведомлений</h3>
+        <h3 className="text-sm font-bold mb-4 uppercase tracking-wide text-slate-700">Настройки Telegram уведомлений (Глобальные)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Bot Token</label>
-            <Input type="password" value={project.telegramBotToken || ''} onChange={e => handleChange('telegramBotToken', e.target.value)} placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" className="font-mono text-xs border-slate-200" />
+            <Input type="password" value={tgToken} onChange={e => setTgToken(e.target.value)} onBlur={handleSaveSettings} placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ" className="font-mono text-xs border-slate-200" />
             <p className="text-[10px] text-slate-400">Токен бота от @BotFather</p>
           </div>
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Chat ID</label>
-            <Input value={project.telegramChatId || ''} onChange={e => handleChange('telegramChatId', e.target.value)} placeholder="-1001234567890" className="font-mono text-xs border-slate-200" />
+            <Input value={tgChatId} onChange={e => setTgChatId(e.target.value)} onBlur={handleSaveSettings} placeholder="-1001234567890" className="font-mono text-xs border-slate-200" />
             <p className="text-[10px] text-slate-400">ID чата или пользователя (можно узнать через @userinfobot)</p>
           </div>
         </div>
       </Card>
+
+      <div className="flex justify-end mt-4">
+        {project.active === false ? (
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              updateProject(project.id, { active: true });
+            }}
+            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200"
+          >
+            Восстановить из архива
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              if (window.confirm('Вы точно хотите архивировать этот проект?')) {
+                updateProject(project.id, { active: false });
+              }
+            }}
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
+          >
+            Архивировать проект
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
