@@ -22,7 +22,7 @@ export default function ProjectsTable({ onSelectProject }: { onSelectProject?: (
     return projects.filter((p: any) => showArchived ? true : p.active !== false).map((p: any) => {
       const budget = Number(p.budget) || 0;
       const hourlyRate = Number(settings?.hourlyRate) || 1;
-      const mult = Number(p.overhead) || 1;
+      const mult = Number(String(p.overhead).replace(',', '.')) || 1;
       
       const planWeekMins = (budget / hourlyRate) * 60 * mult;
       const planMonthMins = (budget / hourlyRate) * 60 * 4.33; // Approx weeks per month

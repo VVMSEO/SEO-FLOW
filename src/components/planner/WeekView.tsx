@@ -57,8 +57,8 @@ export default function WeekView() {
 
   const handleAddSession = (date: Date) => {
     addLog({
-      projectId: projects[0]?.id || "",
-      projectName: projects[0]?.name || "Без проекта",
+      projectId: "",
+      projectName: "",
       task: "",
       status: "Не начата",
       date: format(date, "yyyy-MM-dd"),
@@ -80,7 +80,7 @@ export default function WeekView() {
         minutes: Math.round(
           ((Number(p.budget) || 0) / hourlyRate) *
             60 *
-            (Number(p.overhead) || 1),
+            (Number(String(p.overhead).replace(',', '.')) || 1),
         ),
       }))
       .filter((p) => p.minutes > 0);

@@ -37,7 +37,8 @@ export default function Settings() {
     if (!newProject.name) return;
 
     const budgetNum = Number(newProject.budget) || 0;
-    const multNum = Number(newProject.overhead) || 1;
+    let multStr = String(newProject.overhead).replace(',', '.');
+    const multNum = Number(multStr) || 1;
     const hourlyNum = Number(hourlyRate) || 1;
     
     // Calculate planned minutes per week: (budget / hourlyRate) * mult * 60 (simplified if mult is just a coef)
@@ -63,7 +64,7 @@ export default function Settings() {
     .reduce((sum, p) => {
       const b = Number((p as any).budget) || 0;
       const h = Number(hourlyRate) || 1;
-      const m = Number((p as any).overhead) || 1;
+      const m = Number(String((p as any).overhead).replace(',', '.')) || 1;
       return sum + (b / h) * 60 * m;
     }, 0);
 
@@ -169,7 +170,7 @@ export default function Settings() {
             </div>
             <div className="w-32 flex flex-col justify-end">
               <span className="text-xs text-slate-500 mb-1">План в неделю:</span>
-              <span className="font-medium text-sm pt-2">{formatMinutes(((Number(newProject.budget) || 0) / (Number(hourlyRate) || 1)) * 60 * (Number(newProject.overhead) || 1))}</span>
+              <span className="font-medium text-sm pt-2">{formatMinutes(((Number(newProject.budget) || 0) / (Number(hourlyRate) || 1)) * 60 * (Number(String(newProject.overhead).replace(',', '.')) || 1))}</span>
             </div>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm bottom-0">Добавить</Button>
           </form>
@@ -189,7 +190,7 @@ export default function Settings() {
               <tbody className="divide-y divide-slate-100">
                 {projects.filter((p: any) => showArchived || p.active !== false).map((project: any) => {
                   const pBudget = Number(project.budget) || 0;
-                  const pMult = Number(project.overhead) || 1;
+                  const pMult = Number(String(project.overhead).replace(',', '.')) || 1;
                   const pmWeekly = (pBudget / (Number(hourlyRate) || 1)) * 60 * pMult;
 
                   return (
