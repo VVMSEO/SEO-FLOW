@@ -5,15 +5,15 @@ export async function sendTelegramMessage(botToken: string, chatId: string, mess
   const id = chatId.trim();
 
   try {
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const response = await fetch(`/api/telegram`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        chat_id: id,
-        text: message,
-        parse_mode: 'HTML',
+        botToken: token,
+        chatId: id,
+        message: message
       }),
     });
     
