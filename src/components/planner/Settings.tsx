@@ -15,6 +15,10 @@ export default function Settings() {
   // Project form state
   const [newProject, setNewProject] = useState({ name: '', budget: '', overhead: '1' });
   const [showArchived, setShowArchived] = useState(false);
+  
+  // Editing state
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editProjectData, setEditProjectData] = useState({ budget: '', overhead: '' });
 
   useEffect(() => {
     if (settings) {
@@ -39,11 +43,7 @@ export default function Settings() {
     const budgetNum = Number(newProject.budget) || 0;
     let multStr = String(newProject.overhead).replace(',', '.');
     const multNum = Number(multStr) || 1;
-    const hourlyNum = Number(hourlyRate) || 1;
     
-    // Calculate planned minutes per week: (budget / hourlyRate) * mult * 60 (simplified if mult is just a coef)
-    const activePlanMinutes = (budgetNum / hourlyNum) * 60 * multNum;
-
     await addProject({
       name: newProject.name,
       budget: budgetNum.toString(),
@@ -51,6 +51,32 @@ export default function Settings() {
       active: true
     });
     setNewProject({ name: '', budget: '', overhead: '1' });
+  };
+
+  const handleEditClick = (project: any) => {
+    setEditingProjectId(project.id);
+    setEditProjectData({
+      budget: project.budget || '',
+      overhead: project.overhead ? project.overhead.toString() : '1'
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProjectId(null);
+    setEditProjectData({ budget: '', overhead: '' });
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    const budgetNum = Number(editProjectData.budget) || 0;
+    let multStr = String(editProjectData.overhead).replace(',', '.');
+    const multNum = Number(multStr) || 1;
+    
+    await updateProject(id, {
+      budget: budgetNum.toString(),
+      overhead: multNum
+    });
+    
+    setEditingProjectId(null);
   };
 
   const toggleProjectStatus = (id: string, active: boolean) => {
@@ -65,7 +91,7 @@ export default function Settings() {
       const b = Number((p as any).budget) || 0;
       const h = Number(hourlyRate) || 1;
       const m = Number(String((p as any).overhead).replace(',', '.')) || 1;
-      return sum + (b / h) * 60 * m;
+      return sum + ((b / m) / h) * 60 / 4.33;
     }, 0);
 
   return (
@@ -170,7 +196,7 @@ export default function Settings() {
             </div>
             <div className="w-32 flex flex-col justify-end">
               <span className="text-xs text-slate-500 mb-1">План в неделю:</span>
-              <span className="font-medium text-sm pt-2">{formatMinutes(((Number(newProject.budget) || 0) / (Number(hourlyRate) || 1)) * 60 * (Number(String(newProject.overhead).replace(',', '.')) || 1))}</span>
+              <span className="font-medium text-sm pt-2">{formatMinutes((((Number(newProject.budget) || 0) / (Number(String(newProject.overhead).replace(',', '.')) || 1)) / (Number(hourlyRate) || 1)) * 60 / 4.33)}</span>
             </div>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm bottom-0">Добавить</Button>
           </form>
@@ -189,26 +215,70 @@ export default function Settings() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {projects.filter((p: any) => showArchived || p.active !== false).map((project: any) => {
-                  const pBudget = Number(project.budget) || 0;
-                  const pMult = Number(String(project.overhead).replace(',', '.')) || 1;
-                  const pmWeekly = (pBudget / (Number(hourlyRate) || 1)) * 60 * pMult;
+                  const isEditing = editingProjectId === project.id;
+                  const pBudget = isEditing 
+                    ? (Number(editProjectData.budget) || 0) 
+                    : (Number(project.budget) || 0);
+                  const pMult = isEditing 
+                    ? (Number(String(editProjectData.overhead).replace(',', '.')) || 1) 
+                    : (Number(String(project.overhead).replace(',', '.')) || 1);
+                  const pmWeekly = ((pBudget / pMult) / (Number(hourlyRate) || 1)) * 60 / 4.33;
 
                   return (
-                    <tr key={project.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={project.id} className={`transition-colors ${isEditing ? 'bg-blue-50/50 shadow-sm relative z-10' : 'hover:bg-slate-50'}`}>
                       <td className="px-4 py-4 font-medium text-slate-900">{project.name}</td>
-                      <td className="px-4 py-4 text-right text-slate-600">{project.budget}</td>
-                      <td className="px-4 py-4 text-center text-slate-600">{project.overhead}</td>
-                      <td className="px-4 py-4 text-right text-slate-800 font-medium">{formatMinutes(pmWeekly)}</td>
-                      <td className="px-4 py-4 text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${project.active !== false ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                          {project.active !== false ? 'Активен' : 'Архив'}
-                        </span>
+                      <td className="px-4 py-4 text-left">
+                        {isEditing ? (
+                          <input 
+                            type="number"
+                            className="w-full max-w-[120px] px-2 py-1 text-sm border border-slate-300 rounded focus:border-blue-500 focus:ring-blue-500"
+                            value={editProjectData.budget}
+                            onChange={(e) => setEditProjectData({ ...editProjectData, budget: e.target.value })}
+                          />
+                        ) : (
+                          <span className="text-slate-600">{project.budget}</span>
+                        )}
                       </td>
-                      <td className="px-4 py-4 text-right space-x-3">
-                        <button onClick={() => toggleProjectStatus(project.id, project.active !== false)} className="text-blue-600 hover:text-blue-800 font-medium text-xs uppercase tracking-wider">
-                          {project.active !== false ? 'В архив' : 'Извлечь'}
-                        </button>
-                        <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:text-red-700 font-medium text-xs uppercase tracking-wider">Удалить</button>
+                      <td className="px-4 py-4 text-left">
+                        {isEditing ? (
+                          <input 
+                            type="number" step="0.1"
+                            className="w-full max-w-[80px] px-2 py-1 text-sm border border-slate-300 rounded focus:border-blue-500 focus:ring-blue-500"
+                            value={editProjectData.overhead}
+                            onChange={(e) => setEditProjectData({ ...editProjectData, overhead: e.target.value })}
+                          />
+                        ) : (
+                          <span className="text-slate-600">{project.overhead}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-left text-blue-700 font-medium">{formatMinutes(pmWeekly)}</td>
+                      <td className="px-4 py-4 text-left">
+                        {project.active !== false ? (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Активен</span>
+                        ) : (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Архив</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-left space-x-3 whitespace-nowrap">
+                        {isEditing ? (
+                          <>
+                            <button onClick={() => handleSaveEdit(project.id)} className="text-green-600 hover:text-green-800 font-medium text-xs uppercase tracking-wider">
+                              Сохранить
+                            </button>
+                            <button onClick={handleCancelEdit} className="text-slate-500 hover:text-slate-700 font-medium text-xs uppercase tracking-wider">
+                              Отмена
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => handleEditClick(project)} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                              Изменить
+                            </button>
+                            <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:text-red-700 font-medium text-sm">
+                              Удалить
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   )

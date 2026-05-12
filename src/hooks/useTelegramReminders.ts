@@ -110,7 +110,7 @@ export function useTelegramReminders(user: any, settings: any, activeTimer: any,
           if (!p.active) return;
           const hourlyRate = Number(settings.hourlyRate) || 1;
           const overhead = Number(String(p.overhead).replace(',', '.')) || 1;
-          const planned = ((Number(p.budget) || 0) / hourlyRate) * 60 * overhead;
+          const planned = (((Number(p.budget) || 0) / overhead) / hourlyRate) * 60 / 4.33;
           const actual = weekLogs.filter(l => (l as any).projectId === p.id).reduce((sum, l: any) => sum + (l.workedMinutes || 0), 0);
           
           if (actual > planned) {

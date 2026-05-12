@@ -78,9 +78,8 @@ export default function WeekView() {
         id: p.id,
         name: p.name,
         minutes: Math.round(
-          ((Number(p.budget) || 0) / hourlyRate) *
-            60 *
-            (Number(String(p.overhead).replace(',', '.')) || 1),
+          (((Number(p.budget) || 0) / (Number(String(p.overhead).replace(',', '.')) || 1)) / hourlyRate) *
+            60 / 4.33
         ),
       }))
       .filter((p) => p.minutes > 0);
@@ -149,7 +148,7 @@ export default function WeekView() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto h-full flex flex-col">
+    <div className="p-8 h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Неделя</h1>
         <div className="flex items-center gap-4">
@@ -224,7 +223,7 @@ export default function WeekView() {
                 </div>
                 <button
                   onClick={() => handleAddSession(day)}
-                  className="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center gap-1 transition-opacity"
                 >
                   <Plus size={14} /> Добавить сеанс
                 </button>
@@ -394,6 +393,24 @@ export default function WeekView() {
           onClose={() => setEditingLogId(null)}
         />
       )}
+
+      {/* Footer Summary */}
+      <div className="bg-[#212b36] text-white p-4 shrink-0 rounded-lg mt-4 w-full relative left-0 right-0 z-10 shadow-lg">
+        <div className="flex justify-between items-center text-sm px-2">
+          <div>
+            <span className="text-slate-400">Задач в плане: </span>
+            <span className="font-bold ml-1">{weekLogs.length}</span>
+            <span className="text-slate-400 ml-4 mr-1">| Выполнено: </span>
+            <span className="font-bold">{weekLogs.filter(l => l.status === "Сделана").length}</span>
+          </div>
+          <div>
+            <span className="text-slate-400">План: </span>
+            <span className="font-bold ml-1">{formatMinutes(weekLogs.reduce((acc, l) => acc + (l.minutes || 0), 0))}</span>
+            <span className="text-slate-400 ml-4 mr-1">| Факт: </span>
+            <span className="font-bold">{formatMinutes(weekLogs.reduce((acc, l) => acc + (l.workedMinutes || 0), 0))}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

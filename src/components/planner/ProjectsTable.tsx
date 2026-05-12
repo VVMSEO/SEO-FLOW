@@ -24,8 +24,8 @@ export default function ProjectsTable({ onSelectProject }: { onSelectProject?: (
       const hourlyRate = Number(settings?.hourlyRate) || 1;
       const mult = Number(String(p.overhead).replace(',', '.')) || 1;
       
-      const planWeekMins = (budget / hourlyRate) * 60 * mult;
-      const planMonthMins = (budget / hourlyRate) * 60 * 4.33; // Approx weeks per month
+      const planMonthMins = ((budget / mult) / hourlyRate) * 60;
+      const planWeekMins = planMonthMins / 4.33;
 
       const pLogs = logs.filter(l => l.projectId === p.id);
       
