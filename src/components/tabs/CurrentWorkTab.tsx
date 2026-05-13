@@ -6,7 +6,7 @@ import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
 import { Badge } from '../ui/Badge';
-import { Plus, Trash2, CheckCircle2, Bell, ArrowDownToLine, CheckSquare, Play, Square } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Bell, ArrowDownToLine, CheckSquare, Play, Square, MessageSquare, Send } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { cn } from '../../lib/utils';
 import { sendTelegramMessage } from '../../lib/telegram';
@@ -26,6 +26,7 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
   const { activeTimer, startTimer, stopTimer } = useTimer();
   const { logs, addLog, updateLog: updateTimeLog } = useTimeLogs();
   const { settings } = useSettings();
+  const [actionInputs, setActionInputs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (hasCheckedReminders.current && checkTrigger === 0) return;
@@ -109,7 +110,8 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
       assignee: task.assignee,
       result: 'Выполнено' as const,
       whatToCheck: task.whatToCheck,
-      docLink: task.docLink
+      docLink: task.docLink,
+      actions: task.actions
     };
     updateProject(project.id, {
       completed: [newItem, ...project.completed],
@@ -173,6 +175,47 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
     if (logToUse) {
       startTimer(logToUse);
     }
+  };
+
+  const addTaskAction = (taskId: string) => {
+    const text = actionInputs[taskId]?.trim();
+    if (!text) return;
+
+    const task = project.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const newAction = {
+      id: uuidv4(),
+      text,
+      date: new Date().toISOString(),
+      isDone: false
+    };
+
+    updateTask(taskId, {
+      actions: [...(task.actions || []), newAction]
+    });
+
+    setActionInputs(prev => ({ ...prev, [taskId]: '' }));
+  };
+
+  const toggleTaskAction = (taskId: string, actionId: string) => {
+    const task = project.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const updatedActions = (task.actions || []).map(a => 
+      a.id === actionId ? { ...a, isDone: !a.isDone } : a
+    );
+
+    updateTask(taskId, { actions: updatedActions });
+  };
+
+  const removeTaskAction = (taskId: string, actionId: string) => {
+    const task = project.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const updatedActions = (task.actions || []).filter(a => a.id !== actionId);
+
+    updateTask(taskId, { actions: updatedActions });
   };
 
   return (
@@ -345,9 +388,70 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-3 space-y-1">
-                  <label className="text-[10px] uppercase font-semibold text-slate-500">Что проверить</label>
-                  <Textarea value={task.whatToCheck} onChange={e => updateTask(task.id, { whatToCheck: e.target.value })} placeholder="Например: страницы в индексе, рост показов..." className="min-h-[40px] text-sm border-slate-200 bg-slate-50 resize-y" />
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-3">
+                  <div className="flex flex-col gap-1 h-full min-h-[150px]">
+                    <label className="text-[10px] uppercase font-semibold text-slate-500 shrink-0">Что проверить</label>
+                    <Textarea value={task.whatToCheck} onChange={e => updateTask(task.id, { whatToCheck: e.target.value })} placeholder="Например: страницы в индексе, рост показов..." className="flex-1 w-full text-sm border-slate-200 bg-slate-50 resize-y" />
+                  </div>
+
+                  {/* Actions Feed */}
+                  <div className="space-y-2 flex flex-col">
+                    <label className="text-[10px] uppercase font-semibold text-slate-500 flex items-center gap-1">
+                      <MessageSquare className="w-3 h-3" /> Лента действий
+                    </label>
+                    
+                    <div className="flex-1 bg-slate-50 rounded-md border border-slate-200 p-2 overflow-y-auto max-h-[150px] min-h-[80px] space-y-2">
+                      {task.actions && task.actions.length > 0 ? (
+                        task.actions.map(action => (
+                          <div key={action.id} className="group flex items-start gap-2 text-sm bg-white p-1.5 rounded border border-slate-100 shadow-sm">
+                            <button
+                              onClick={() => toggleTaskAction(task.id, action.id)}
+                              className={cn(
+                                "mt-0.5 shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                                action.isDone ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-300 hover:border-emerald-500"
+                              )}
+                            >
+                              {action.isDone && <CheckCircle2 className="w-3 h-3" />}
+                            </button>
+                            <div className={cn("flex-1 text-slate-700", action.isDone && "line-through text-slate-400")}>
+                              {action.text}
+                            </div>
+                            <button
+                              onClick={() => removeTaskAction(task.id, action.id)}
+                              className="opacity-0 group-hover:opacity-100 shrink-0 text-slate-400 hover:text-red-500 transition-opacity"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-xs text-slate-400 text-center py-4">Нет записей</div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-auto">
+                      <Input
+                        value={actionInputs[task.id] || ''}
+                        onChange={e => setActionInputs(prev => ({ ...prev, [task.id]: e.target.value }))}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addTaskAction(task.id);
+                          }
+                        }}
+                        placeholder="Зафиксировать действие..."
+                        className="h-8 text-xs"
+                      />
+                      <Button
+                        onClick={() => addTaskAction(task.id)}
+                        disabled={!actionInputs[task.id]?.trim()}
+                        size="icon"
+                        className="h-8 w-8 shrink-0 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Send className="w-3.5 h-3.5 text-white" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>

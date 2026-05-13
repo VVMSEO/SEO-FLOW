@@ -42,6 +42,13 @@ export interface Project {
   accesses?: AccessItem[];
 }
 
+export interface TaskAction {
+  id: string;
+  text: string;
+  date: string;
+  isDone?: boolean;
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -58,6 +65,7 @@ export interface Task {
   docLink?: string;
   lastOverdueReminder?: string;
   lastCheckReminder?: string;
+  actions?: TaskAction[];
 }
 
 export interface QueueItem {
@@ -103,6 +111,7 @@ export interface CompletedItem {
   whatToCheck?: string;
   comment?: string;
   docLink?: string;
+  actions?: TaskAction[];
 }
 
 export interface DailyLogItem {

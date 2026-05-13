@@ -5,7 +5,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 import { Select } from '../ui/Select';
-import { Plus, Trash2, ArrowUpLeft } from 'lucide-react';
+import { Plus, Trash2, ArrowUpLeft, CheckCircle2, MessageSquare } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
@@ -54,7 +54,8 @@ export function CompletedTab({ project, updateProject }: Props) {
       status: 'В работе',
       startDate: new Date().toISOString().split('T')[0],
       whatToCheck: item.whatToCheck || '',
-      docLink: item.docLink
+      docLink: item.docLink,
+      actions: item.actions
     };
     
     updateProject(project.id, { 
@@ -148,6 +149,32 @@ export function CompletedTab({ project, updateProject }: Props) {
                     </Button>
                   </div>
                 </div>
+
+                {item.actions && item.actions.length > 0 ? (
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col">
+                    <label className="text-[10px] uppercase font-semibold text-slate-500 mb-2 flex items-center gap-1">
+                      <MessageSquare className="w-3 h-3" /> Лента действий
+                    </label>
+                    <div className="bg-slate-50/50 rounded-md border border-slate-200 p-2 space-y-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                      {item.actions.map(action => (
+                        <div key={action.id} className="flex items-start gap-2 text-sm bg-white p-1.5 rounded border border-slate-100 shadow-sm">
+                          <div className={`mt-0.5 shrink-0 w-4 h-4 rounded border flex items-center justify-center ${action.isDone ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-300"}`}>
+                             {action.isDone && <CheckCircle2 className="w-3 h-3" />}
+                          </div>
+                          <div className={`flex-1 text-slate-700 ${action.isDone ? "line-through text-slate-400" : ""}`}>
+                            {action.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  item.actions && item.actions.length === 0 ? (
+                    <div className="mt-4 pt-2 border-t border-slate-100 text-[10px] text-slate-400 flex items-center gap-1">
+                      <MessageSquare className="w-3 h-3" /> Лента действий пуста
+                    </div>
+                  ) : null
+                )}
               </div>
             </Card>
           ))
