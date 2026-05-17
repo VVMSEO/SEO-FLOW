@@ -6,6 +6,7 @@ import { useTimer } from "../../context/TimerContext";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { formatMinutes } from "../../utils/timeCalc";
+import { cn } from "../../lib/utils";
 import {
   addDays,
   startOfWeek,
@@ -148,40 +149,40 @@ export default function WeekView() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto h-full flex flex-col">
+    <div className="p-8 max-w-5xl mx-auto h-full flex flex-col hide-scrollbar">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Неделя</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Неделя</h1>
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
-            className="text-red-600 border-red-200 hover:bg-red-50"
+            className="text-red-600 border-red-200 hover:bg-red-50 rounded-xl"
             onClick={handleClearDrafts}
           >
             Очистить черновики
           </Button>
           <Button
             variant="outline"
-            className="text-blue-600 border-blue-200 hover:bg-blue-50 gap-2"
+            className="text-zinc-600 border-zinc-200 hover:bg-zinc-50 gap-2 rounded-xl"
             onClick={handleSmartPlan}
             disabled={isPlanning}
           >
             <Wand2 size={16} />
             {isPlanning ? "Планируем..." : "Умный план"}
           </Button>
-          <div className="flex items-center gap-2 bg-white px-4 py-2 border border-slate-200 rounded-md">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 border border-zinc-200 rounded-xl shadow-sm">
             <button
               onClick={handlePrevWeek}
-              className="text-slate-500 hover:text-slate-900 px-1"
+              className="text-zinc-400 hover:text-zinc-900 px-1 transition-colors"
             >
               ←
             </button>
-            <span className="text-sm font-medium text-slate-700">
-              Неделя: [{format(startOfWk, "dd.MM")} —{" "}
-              {format(addDays(startOfWk, 6), "dd.MM")}]
+            <span className="text-sm font-medium text-zinc-700">
+              Неделя: <span className="text-zinc-400">[{format(startOfWk, "dd.MM")} —{" "}
+              {format(addDays(startOfWk, 6), "dd.MM")}]</span>
             </span>
             <button
               onClick={handleNextWeek}
-              className="text-slate-500 hover:text-slate-900 px-1"
+              className="text-zinc-400 hover:text-zinc-900 px-1 transition-colors"
             >
               →
             </button>
@@ -189,9 +190,9 @@ export default function WeekView() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 pb-12">
+      <div className="flex-1 overflow-y-auto space-y-6 pb-12 hide-scrollbar">
         {weekLogs.length === 0 ? (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-24 text-zinc-400">
             Нет данных за эту неделю
           </div>
         ) : null}
@@ -212,34 +213,34 @@ export default function WeekView() {
           return (
             <div
               key={dateStr}
-              className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col"
+              className="bg-white rounded-3xl border border-zinc-200/60 shadow-sm overflow-hidden flex flex-col"
             >
-              <div className="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center group">
-                <div className="font-semibold text-slate-800 capitalize">
+              <div className="bg-zinc-50 border-b border-zinc-100 p-5 flex justify-between items-center group">
+                <div className="font-bold text-zinc-900 capitalize tracking-tight">
                   {format(day, "EEEE", { locale: ru })}{" "}
-                  <span className="text-slate-400 font-normal ml-2 text-sm lowercase">
+                  <span className="text-zinc-400 font-medium ml-2 text-sm lowercase">
                     {dateStr}
                   </span>
                 </div>
                 <button
                   onClick={() => handleAddSession(day)}
-                  className="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center gap-1 transition-opacity"
+                  className="text-zinc-500 hover:text-zinc-900 text-sm font-semibold flex items-center gap-1.5 transition-colors bg-white px-3 py-1 rounded-full border border-zinc-200 shadow-sm opacity-0 group-hover:opacity-100"
                 >
                   <Plus size={14} /> Добавить сеанс
                 </button>
               </div>
 
               {dayLogs.length > 0 && (
-                <div className="px-4 pt-4 pb-2">
-                  <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden w-full mb-2">
+                <div className="px-5 pt-4 pb-2">
+                  <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden w-full mb-2">
                     <div
-                      className={`h-full rounded-full transition-all bg-blue-500`}
+                      className={`h-full rounded-full transition-all bg-zinc-900`}
                       style={{
                         width: `${Math.min(100, (dayWorked / 480) * 100)}%`,
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-slate-500">
+                  <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-zinc-400">
                     <span>Таймлайн (Факт)</span>
                     <span>{formatMinutes(dayWorked)}</span>
                   </div>
@@ -247,7 +248,7 @@ export default function WeekView() {
               )}
 
               {dayLogs.length > 0 && (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-zinc-100/80 p-2">
                   {dayLogs.map((log) => {
                     const progress =
                       log.minutes > 0
@@ -263,14 +264,14 @@ export default function WeekView() {
                     return (
                       <div
                         key={log.id}
-                        className={isActive ? "p-4 bg-red-50/50 border border-red-200 rounded-md my-1" : "p-4 hover:bg-slate-50/50"}
+                        className={cn("p-4 rounded-2xl transition-colors", isActive ? "bg-red-50/50 border border-red-100 shadow-sm" : "hover:bg-zinc-50/80")}
                       >
                         <div className="flex flex-col md:flex-row gap-6 items-start">
                           <div className="w-full md:w-1/4">
-                            <div className="font-medium text-slate-900">
+                            <div className="font-semibold text-zinc-900">
                               {log.projectName || "Без проекта"}
                             </div>
-                            <div className="text-sm text-slate-500 mt-1 flex justify-between">
+                            <div className="text-sm text-zinc-500 mt-1 flex justify-between">
                               <span>
                                 План: {formatMinutes(log.minutes || 0)}
                               </span>
@@ -278,51 +279,51 @@ export default function WeekView() {
                               <div className="text-sm flex items-center gap-1 mt-1">
                                 {isActive ? (
                                   <>
-                                    <span className="text-blue-600 font-medium">Факт:</span>
+                                    <span className="text-zinc-600 font-medium">Факт:</span>
                                     <LiveTimerDisplay startTime={activeTimer.startTime} initialMinutes={activeTimer.initialWorkedMinutes} />
-                                    <span className="text-red-600 font-medium ml-1 text-xs flex items-center gap-1">
+                                    <span className="text-red-500 font-medium ml-1 text-xs flex items-center gap-1">
                                       ⏱ Идет отсчет...
                                     </span>
                                   </>
                                 ) : (
-                                  <span className="text-blue-600 font-medium">
+                                  <span className="text-zinc-600 font-medium">
                                     Факт: {formatMinutes(log.workedMinutes || 0)}
                                   </span>
                                 )}
                               </div>
 
-                              <div className="mt-3 flex items-center gap-2">
-                                <div className="text-xs text-slate-500 w-8">
+                              <div className="mt-4 flex items-center gap-2">
+                                <div className="text-xs font-bold text-zinc-400 w-8">
                                   {progress}%
                                 </div>
-                                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden">
                                   <div
-                                    className={`h-full rounded-full transition-all ${progress >= 100 ? "bg-emerald-500" : "bg-blue-500"}`}
+                                    className={`h-full rounded-full transition-all ${progress >= 100 ? "bg-emerald-500" : "bg-zinc-900"}`}
                                     style={{ width: `${progress}%` }}
                                   />
                                 </div>
                               </div>
                             </div>
 
-                            <div className="flex-1 w-full space-y-3">
-                              <div className="text-slate-800 break-words whitespace-pre-wrap">
+                            <div className="flex-1 w-full space-y-3 pt-1">
+                              <div className="text-zinc-800 break-words whitespace-pre-wrap font-medium">
                                 {log.task || "Новая задача..."}
                               </div>
                               {log.result && (
-                                <div className="text-sm text-slate-500 break-words border-l-2 border-slate-200 pl-3">
+                                <div className="text-sm text-zinc-500 break-words border-l-2 border-zinc-200 pl-3">
                                   {log.result}
                                 </div>
                               )}
-                              <div className="flex justify-between items-center w-full">
+                              <div className="flex justify-between items-center w-full mt-2">
                                 {isActive ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-red-600 uppercase tracking-wide">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 uppercase tracking-wide bg-red-100 border border-red-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
                                     В процессе
                                   </span>
                                 ) : (
                                   <span
-                                    className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium cursor-default
-                                 ${log.status === "Сделана" ? "bg-emerald-100 text-emerald-700" : log.status === "В работе" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}
+                                    className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wide border
+                                 ${log.status === "Сделана" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : log.status === "В работе" ? "bg-zinc-100 text-zinc-900 border-zinc-300" : "bg-zinc-50 text-zinc-500 border-zinc-200"}`}
                                   >
                                     {log.status || "Не начата"}
                                   </span>
@@ -330,37 +331,37 @@ export default function WeekView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex items-center gap-2 shrink-0 self-start md:self-center bg-white p-1 rounded-full shadow-sm border border-zinc-100">
                               {activeTimer?.logId === log.id ? (
                                 <button
                                   onClick={() => stopTimer()}
-                                  className="p-2 text-slate-600 hover:text-slate-900 transition-colors"
+                                  className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                                   title="Остановить таймер"
                                 >
-                                  <Square size={18} />
+                                  <Square size={14} fill="currentColor" />
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => startTimer(log)}
-                                  className="p-2 text-green-600 hover:text-green-700 transition-colors"
+                                  className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-50 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
                                   title="Запустить таймер"
                                 >
-                                  <Play size={18} />
+                                  <Play size={14} fill="currentColor" />
                                 </button>
                               )}
                               <button
                                 onClick={() => setEditingLogId(log.id)}
-                                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                                className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
                                 title="Редактировать"
                               >
-                                <Edit2 size={18} />
+                                <Edit2 size={14} />
                               </button>
                               <button
                                 onClick={() => deleteLog(log.id)}
-                                className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                                className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                                 title="Удалить"
                               >
-                                <Trash2 size={18} />
+                                <Trash2 size={14} />
                               </button>
                             </div>
                           </div>
@@ -370,13 +371,13 @@ export default function WeekView() {
                 </div>
               )}
 
-              <div className="bg-slate-50 border-t border-slate-200 p-3 text-right text-sm text-slate-600">
+              <div className="bg-zinc-50 border-t border-zinc-100 p-4 text-right text-sm text-zinc-500 font-medium">
                 Итого за день: План{" "}
-                <span className="font-medium text-slate-800">
+                <span className="font-bold text-zinc-900">
                   {formatMinutes(dayPlanned)}
                 </span>{" "}
                 / Факт{" "}
-                <span className="font-medium text-slate-800">
+                <span className="font-bold text-zinc-900">
                   {formatMinutes(dayWorked)}
                 </span>
               </div>
@@ -395,19 +396,21 @@ export default function WeekView() {
       )}
 
       {/* Footer Summary */}
-      <div className="bg-[#212b36] text-white p-4 shrink-0 rounded-lg mt-4 w-full relative left-0 right-0 z-10 shadow-lg">
-        <div className="flex justify-between items-center text-sm px-2">
+      <div className="bg-zinc-900 text-white px-6 py-4 shrink-0 mt-4 max-w-5xl mx-auto w-full relative z-10 shadow-2xl rounded-3xl mx-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)]">
+        <div className="flex justify-between items-center text-sm font-medium">
           <div>
-            <span className="text-slate-400">Задач в плане: </span>
-            <span className="font-bold ml-1">{weekLogs.length}</span>
-            <span className="text-slate-400 ml-4 mr-1">| Выполнено: </span>
-            <span className="font-bold">{weekLogs.filter(l => l.status === "Сделана").length}</span>
+            <span className="text-zinc-400">Задач в плане: </span>
+            <span className="font-bold ml-1 text-white">{weekLogs.length}</span>
+            <span className="text-zinc-500 mx-4">|</span>
+            <span className="text-zinc-400 uppercase text-[10px] tracking-wider">Выполнено: </span>
+            <span className="font-bold text-white ml-2 text-base">{weekLogs.filter(l => l.status === "Сделана").length}</span>
           </div>
           <div>
-            <span className="text-slate-400">План: </span>
-            <span className="font-bold ml-1">{formatMinutes(weekLogs.reduce((acc, l) => acc + (l.minutes || 0), 0))}</span>
-            <span className="text-slate-400 ml-4 mr-1">| Факт: </span>
-            <span className="font-bold">{formatMinutes(weekLogs.reduce((acc, l) => acc + (l.workedMinutes || 0), 0))}</span>
+            <span className="text-zinc-400">План: </span>
+            <span className="font-bold ml-1 text-white">{formatMinutes(weekLogs.reduce((acc, l) => acc + (l.minutes || 0), 0))}</span>
+            <span className="text-zinc-500 mx-4">|</span>
+            <span className="text-zinc-400 uppercase text-[10px] tracking-wider">Факт: </span>
+            <span className="font-bold text-white ml-2 text-base">{formatMinutes(weekLogs.reduce((acc, l) => acc + (l.workedMinutes || 0), 0))}</span>
           </div>
         </div>
       </div>

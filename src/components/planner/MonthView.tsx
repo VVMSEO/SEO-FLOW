@@ -43,23 +43,23 @@ export default function MonthView({ onSelectProject }: { onSelectProject?: (id: 
   return (
     <div className="p-8 max-w-[1200px] mx-auto w-full space-y-8 font-sans">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Месяц</h1>
-        <div className="flex items-center gap-2 bg-white px-4 py-2 border border-slate-200 rounded-md">
-          <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="text-slate-500 hover:text-slate-900 px-1">←</button>
-          <span className="text-sm font-medium text-slate-700 capitalize">
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Месяц</h1>
+        <div className="flex items-center gap-2 bg-white px-4 py-2 border border-zinc-200 rounded-xl shadow-sm">
+          <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="text-zinc-400 hover:text-zinc-900 px-1 transition-colors">←</button>
+          <span className="text-sm font-medium text-zinc-700 capitalize">
             {format(currentMonth, 'LLLL yyyy', { locale: ru })}
           </span>
-          <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="text-slate-500 hover:text-slate-900 px-1">→</button>
+          <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="text-zinc-400 hover:text-zinc-900 px-1 transition-colors">→</button>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-medium text-slate-500">
+      <div className="bg-white p-8 rounded-3xl border border-zinc-200/60 shadow-sm">
+        <div className="grid grid-cols-7 gap-2 mb-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-400">
           <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
         </div>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-3">
           {daysArray.map((day, idx) => {
-            if (!day) return <div key={`empty-${idx}`} className="bg-transparent rounded-lg aspect-square"></div>;
+            if (!day) return <div key={`empty-${idx}`} className="bg-transparent rounded-2xl aspect-square"></div>;
             
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayWork = monthLogs.filter(l => l.date === dateStr).reduce((sum, l) => sum + (l.workedMinutes || 0), 0);
@@ -69,13 +69,13 @@ export default function MonthView({ onSelectProject }: { onSelectProject?: (id: 
             return (
               <div 
                 key={dateStr} 
-                className={`rounded-lg aspect-square p-2 flex flex-col items-center justify-center transition-colors ${
-                  hasWork ? 'bg-blue-500 text-white shadow-sm' : 'bg-slate-50 text-slate-400 border border-slate-100 hover:bg-slate-100'
+                className={`rounded-2xl aspect-square p-2 flex flex-col items-center justify-center transition-all ${
+                  hasWork ? 'bg-zinc-900 text-white shadow-md' : 'bg-zinc-50 text-zinc-400 border border-zinc-100 hover:bg-zinc-100'
                 }`}
               >
-                <span className={`text-lg mb-1 ${hasWork ? 'font-bold' : 'font-medium'}`}>{format(day, 'd')}</span>
+                <span className={`text-xl mb-1 ${hasWork ? 'font-bold' : 'font-medium'}`}>{format(day, 'd')}</span>
                 {hasWork && (
-                  <span className="text-[10px] text-blue-100 font-medium whitespace-nowrap bg-blue-600/30 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] text-zinc-300 font-bold tracking-wide whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
                     {formatMinutes(dayWork)}
                   </span>
                 )}
@@ -85,51 +85,51 @@ export default function MonthView({ onSelectProject }: { onSelectProject?: (id: 
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="bg-white border border-slate-200 p-6 rounded-xl text-center shadow-sm">
-          <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Всего часов за месяц</div>
-          <div className="text-2xl font-bold text-slate-900">{formatMinutes(totalWorked)}</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white border border-zinc-200/60 p-6 rounded-3xl text-center shadow-sm">
+          <div className="text-xs text-zinc-400 uppercase tracking-wider font-bold mb-2">Всего часов за месяц</div>
+          <div className="text-3xl font-extrabold tracking-tight text-zinc-900">{formatMinutes(totalWorked)}</div>
         </div>
-        <div className="bg-white border border-slate-200 p-6 rounded-xl text-center shadow-sm">
-          <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Рабочих дней</div>
-          <div className="text-2xl font-bold text-slate-900">{workDaysCount}</div>
+        <div className="bg-white border border-zinc-200/60 p-6 rounded-3xl text-center shadow-sm">
+          <div className="text-xs text-zinc-400 uppercase tracking-wider font-bold mb-2">Рабочих дней</div>
+          <div className="text-3xl font-extrabold tracking-tight text-zinc-900">{workDaysCount}</div>
         </div>
-        <div className="bg-white border border-slate-200 p-6 rounded-xl text-center shadow-sm">
-          <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">В среднем в день</div>
-          <div className="text-2xl font-bold text-slate-900">{formatMinutes(avgPerDay)}</div>
+        <div className="bg-white border border-zinc-200/60 p-6 rounded-3xl text-center shadow-sm">
+          <div className="text-xs text-zinc-400 uppercase tracking-wider font-bold mb-2">В среднем в день</div>
+          <div className="text-3xl font-extrabold tracking-tight text-zinc-900">{formatMinutes(avgPerDay)}</div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-bold text-slate-900 mb-4">Сводка по проектам</h3>
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <h3 className="text-xl font-bold tracking-tight text-zinc-900 mb-6">Сводка по проектам</h3>
+        <div className="bg-white rounded-3xl border border-zinc-200/60 shadow-sm overflow-hidden">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs font-semibold text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+            <thead className="text-xs font-bold text-zinc-400 uppercase tracking-wider bg-zinc-50 border-b border-zinc-100">
               <tr>
                 <th className="px-6 py-4">Проект</th>
                 <th className="px-6 py-4">Факт</th>
                 <th className="px-6 py-4">План</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {projectSummary.map((ps, idx) => (
-                <tr key={idx} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 font-medium text-slate-900">
+                <tr key={idx} className="hover:bg-zinc-50/80 transition-colors">
+                  <td className="px-6 py-4 font-semibold text-zinc-900">
                     <button 
                       onClick={() => onSelectProject && onSelectProject(ps.id)}
-                      className="hover:text-blue-600 focus:outline-none transition-colors text-left"
+                      className="hover:text-zinc-600 focus:outline-none transition-colors text-left"
                       title="Перейти в карточку проекта"
                     >
                       {ps.name}
                     </button>
                   </td>
-                  <td className="px-6 py-4 font-semibold text-slate-800">{formatMinutes(ps.fact)}</td>
-                  <td className="px-6 py-4 text-slate-600">{formatMinutes(ps.plan)}</td>
+                  <td className="px-6 py-4 font-bold text-zinc-800">{formatMinutes(ps.fact)}</td>
+                  <td className="px-6 py-4 font-medium text-zinc-500">{formatMinutes(ps.plan)}</td>
                 </tr>
               ))}
               {projectSummary.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-slate-500">Нет данных за этот месяц</td>
+                  <td colSpan={3} className="px-6 py-12 text-center text-zinc-400">Нет данных за этот месяц</td>
                 </tr>
               )}
             </tbody>

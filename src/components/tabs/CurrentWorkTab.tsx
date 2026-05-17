@@ -8,6 +8,7 @@ import { Select } from '../ui/Select';
 import { Badge } from '../ui/Badge';
 import { Plus, Trash2, CheckCircle2, Bell, ArrowDownToLine, CheckSquare, Play, Square, MessageSquare, Send } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { sendTelegramMessage } from '../../lib/telegram';
 import { useTimer } from '../../context/TimerContext';
@@ -222,8 +223,8 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Текущая работа</h2>
-          <p className="text-sm text-slate-500">Активные задачи (WIP-лимит: 3-5). Сейчас в работе: {project.tasks.length}</p>
+          <h2 className="text-xl font-bold tracking-tight text-zinc-900">Текущая работа</h2>
+          <p className="text-sm text-zinc-500 mt-1">Активные задачи (WIP-лимит: 3-5). Сейчас в работе: {project.tasks.length}</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -236,13 +237,13 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
               alert("Проверка уведомлений запущена. Если есть просроченные задачи, они будут отправлены в Telegram.");
             }} 
             variant="outline" 
-            className="text-slate-600"
+            className="text-zinc-600 border-zinc-200 hover:bg-zinc-100"
             title="Проверить и отправить уведомления"
           >
             <Bell className="h-4 w-4 mr-2" />
             Уведомления
           </Button>
-          <Button onClick={addTask} disabled={project.tasks.length >= 5} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={addTask} disabled={project.tasks.length >= 5} className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl shadow-sm">
             <Plus className="h-4 w-4 mr-2" />
             Добавить задачу
           </Button>
@@ -250,46 +251,56 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
       </div>
 
       <div className="space-y-4">
-        {project.tasks.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
-            <p className="text-slate-500">Нет активных задач. Возьмите задачу из очереди или создайте новую.</p>
-          </div>
-        ) : (
-          project.tasks.map(task => {
-            const isActive = activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name;
-            
-            return (
-            <Card key={task.id} className={cn("overflow-hidden", task.status === 'Сделано' ? 'opacity-60' : '', isActive ? 'ring-2 ring-red-400 bg-red-50/20' : '')}>
-              <div className={cn("p-4 border-b border-slate-100", isActive ? 'bg-red-50/40' : 'bg-white')}>
+        <AnimatePresence mode="popLayout">
+          {project.tasks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="text-center py-12 bg-zinc-50/50 rounded-2xl border border-dashed border-zinc-300"
+            >
+              <p className="text-zinc-500">Нет активных задач. Возьмите задачу из очереди или создайте новую.</p>
+            </motion.div>
+          ) : (
+            project.tasks.map(task => {
+              const isActive = activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name;
+              
+              return (
+              <motion.div
+                key={task.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+              >
+              <Card className={cn("overflow-hidden rounded-2xl border-zinc-200/60 shadow-sm transition-all", task.status === 'Сделано' ? 'opacity-60 grayscale-[0.5]' : '', isActive ? 'ring-2 ring-zinc-900 shadow-md transform -translate-y-0.5' : 'hover:shadow-md')}>
+              <div className={cn("p-5 border-b border-zinc-100", isActive ? 'bg-zinc-50/80' : 'bg-white')}>
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-2">
                       {isActive ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-red-600 uppercase tracking-wide bg-red-100 border border-red-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-zinc-900 uppercase tracking-wide bg-zinc-100 border border-zinc-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-pulse" />
                           В процессе
                         </span>
                       ) : (
                         <span className={cn(
-                          "text-[10px] uppercase px-2 py-1 rounded font-bold inline-block border",
-                          task.status === 'В работе' ? "bg-blue-100 text-blue-600 border-blue-200" :
+                          "text-[10px] uppercase px-2.5 py-0.5 rounded-full font-bold inline-block border tracking-wide",
+                          task.status === 'В работе' ? "bg-blue-50 text-blue-600 border-blue-200" :
                           task.status === 'Ждёт клиента' ? "bg-orange-50 text-orange-600 border-orange-200" :
                           task.status === 'Проверка результата' ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
-                          task.status === 'Сделано' ? "bg-slate-100 text-slate-500 border-slate-200" :
-                          task.status === 'Сделать сейчас' ? "bg-blue-50 text-blue-700 border-blue-200" :
-                          "bg-slate-100 text-slate-600 border-slate-200"
+                          task.status === 'Сделано' ? "bg-zinc-100 text-zinc-500 border-zinc-200" :
+                          task.status === 'Сделать сейчас' ? "bg-zinc-100 text-zinc-800 border-zinc-200" :
+                          "bg-zinc-50 text-zinc-600 border-zinc-200"
                         )}>
                           {task.status}
                         </span>
                       )}
                       
                       {isActive && activeTimer && (
-                        <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium">
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-600 font-medium bg-white px-2 py-0.5 rounded-full border border-zinc-200 shadow-sm">
                           <span>Факт:</span>
                           <LiveTimerDisplay startTime={activeTimer.startTime} initialMinutes={activeTimer.initialWorkedMinutes} />
-                          <span className="text-red-500 text-xs flex items-center ml-1">
-                            ⏱ Идет отсчет...
-                          </span>
                         </div>
                       )}
                     </div>
@@ -297,11 +308,11 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                       value={task.name} 
                       onChange={e => updateTask(task.id, { name: e.target.value })} 
                       placeholder="Название задачи..." 
-                      className="font-semibold text-sm min-h-[40px] py-1 px-0 border-none shadow-none focus-visible:ring-0 resize-y"
+                      className="font-semibold text-base md:text-lg min-h-[40px] py-1 px-0 border-none shadow-none focus-visible:ring-0 resize-y bg-transparent"
                     />
                   </div>
-                  <div className="flex items-center space-x-1 shrink-0 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
-                    <Select value={task.status} onChange={e => updateTask(task.id, { status: e.target.value as TaskStatus })} className="w-36 h-8 text-xs border-slate-200">
+                  <div className="flex items-center space-x-1 shrink-0 bg-zinc-50 p-1.5 rounded-xl border border-zinc-100/80 shadow-sm">
+                    <Select value={task.status} onChange={e => updateTask(task.id, { status: e.target.value as TaskStatus })} className="w-36 h-8 text-xs border-zinc-200 bg-white rounded-lg">
                       <option value="Сделать сейчас">Сделать сейчас</option>
                       <option value="В работе">В работе</option>
                       <option value="Ждёт клиента">Ждёт клиента</option>
@@ -312,16 +323,16 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                       <option value="Сделано">Сделано</option>
                       <option value="Отменено">Отменено</option>
                     </Select>
-                    <div className="w-px h-6 bg-slate-200 mx-1"></div>
+                    <div className="w-px h-6 bg-zinc-200 mx-1"></div>
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleToggleTimer(task)} 
                       className={cn(
-                        "h-8 w-8 hover:bg-slate-200", 
+                        "h-8 w-8 hover:bg-zinc-200 rounded-lg transition-colors", 
                         activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name
-                          ? "bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700" 
-                          : "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          ? "bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white shadow-inner" 
+                          : "text-zinc-600 hover:text-zinc-900 hover:bg-white border border-transparent shadow-sm"
                       )} 
                       title={activeTimer && activeTimer.task === task.name && activeTimer.projectName === project.name ? "Остановить таймер" : "Запустить таймер"}
                     >
@@ -331,27 +342,27 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                         <Play className="h-4 w-4" fill="currentColor" />
                       )}
                     </Button>
-                    <div className="w-px h-6 bg-slate-200 mx-1"></div>
-                    <Button variant="ghost" size="icon" onClick={() => moveToCompleted(task)} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8" title="Перенести в 'Завершенные'">
+                    <div className="w-px h-6 bg-zinc-200 mx-1"></div>
+                    <Button variant="ghost" size="icon" onClick={() => moveToCompleted(task)} className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8 rounded-lg" title="Перенести в 'Завершенные'">
                       <CheckSquare className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => moveToQueue(task)} className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-8 w-8" title="Вернуть в 'Очередь'">
+                    <Button variant="ghost" size="icon" onClick={() => moveToQueue(task)} className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-8 w-8 rounded-lg" title="Вернуть в 'Очередь'">
                       <ArrowDownToLine className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => removeTask(task.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 w-8" title="Удалить навсегда">
+                    <Button variant="ghost" size="icon" onClick={() => removeTask(task.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg" title="Удалить навсегда">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-7 gap-3 pt-3 border-t border-slate-100">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">Дата начала</label>
-                    <Input type="date" value={task.startDate || ''} onChange={e => updateTask(task.id, { startDate: e.target.value })} className="h-8 text-xs border-slate-200" />
+                <div className="grid grid-cols-2 md:grid-cols-7 gap-3 pt-4 border-t border-zinc-100/80">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Дата начала</label>
+                    <Input type="date" value={task.startDate || ''} onChange={e => updateTask(task.id, { startDate: e.target.value })} className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">Слой</label>
-                    <Select value={task.layer} onChange={e => updateTask(task.id, { layer: e.target.value as TaskLayer })} className="h-8 text-xs border-slate-200">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Слой</label>
+                    <Select value={task.layer} onChange={e => updateTask(task.id, { layer: e.target.value as TaskLayer })} className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors">
                       <option value="Техничка">Техничка</option>
                       <option value="Индексация">Индексация</option>
                       <option value="Структура">Структура</option>
@@ -361,75 +372,78 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                       <option value="Поддержка">Поддержка</option>
                     </Select>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">Приоритет</label>
-                    <Select value={task.priority} onChange={e => updateTask(task.id, { priority: e.target.value as TaskPriority })} className="h-8 text-xs border-slate-200">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Приоритет</label>
+                    <Select value={task.priority} onChange={e => updateTask(task.id, { priority: e.target.value as TaskPriority })} className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors">
                       <option value="A">A - Авария</option>
                       <option value="B">B - Блокер роста</option>
                       <option value="C">C - Усилитель</option>
                       <option value="D">D - Бэклог</option>
                     </Select>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">Ответственный</label>
-                    <Input value={task.assignee} onChange={e => updateTask(task.id, { assignee: e.target.value })} className="h-8 text-xs border-slate-200" />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Ответственный</label>
+                    <Input value={task.assignee} onChange={e => updateTask(task.id, { assignee: e.target.value })} className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">Срок</label>
-                    <Input type="date" value={task.deadline || ''} onChange={e => updateTask(task.id, { deadline: e.target.value })} className="h-8 text-xs border-slate-200" />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Срок</label>
+                    <Input type="date" value={task.deadline || ''} onChange={e => updateTask(task.id, { deadline: e.target.value })} className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">След. проверка</label>
-                    <Input type="date" value={task.nextCheckDate || ''} onChange={e => updateTask(task.id, { nextCheckDate: e.target.value })} className="h-8 text-xs border-slate-200" />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">След. проверка</label>
+                    <Input type="date" value={task.nextCheckDate || ''} onChange={e => updateTask(task.id, { nextCheckDate: e.target.value })} className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500">Ссылка на ТЗ</label>
-                    <Input value={task.docLink || ''} onChange={e => updateTask(task.id, { docLink: e.target.value })} placeholder="https://..." className="h-8 text-xs border-slate-200" />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Ссылка на ТЗ</label>
+                    <Input value={task.docLink || ''} onChange={e => updateTask(task.id, { docLink: e.target.value })} placeholder="https://..." className="h-8 text-xs border-zinc-200 bg-zinc-50 hover:bg-white transition-colors" />
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-3">
-                  <div className="flex flex-col gap-1 h-full min-h-[150px]">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500 shrink-0">Что проверить</label>
-                    <Textarea value={task.whatToCheck} onChange={e => updateTask(task.id, { whatToCheck: e.target.value })} placeholder="Например: страницы в индексе, рост показов..." className="flex-1 w-full text-sm border-slate-200 bg-slate-50 resize-y" />
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-zinc-100/80 pt-4">
+                  <div className="flex flex-col gap-1.5 h-full min-h-[150px]">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400 shrink-0">Что проверить</label>
+                    <Textarea value={task.whatToCheck} onChange={e => updateTask(task.id, { whatToCheck: e.target.value })} placeholder="Например: страницы в индексе, рост показов..." className="flex-1 w-full text-sm border-zinc-200 bg-zinc-50 hover:bg-white transition-colors focus:bg-white resize-none rounded-xl p-3" />
                   </div>
 
                   {/* Actions Feed */}
                   <div className="space-y-2 flex flex-col">
-                    <label className="text-[10px] uppercase font-semibold text-slate-500 flex items-center gap-1">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400 flex items-center gap-1.5">
                       <MessageSquare className="w-3 h-3" /> Лента действий
                     </label>
                     
-                    <div className="flex-1 bg-slate-50 rounded-md border border-slate-200 p-2 overflow-y-auto max-h-[150px] min-h-[80px] space-y-2">
+                    <div className="flex-1 bg-zinc-50 rounded-xl border border-zinc-200/60 p-2 overflow-y-auto max-h-[150px] min-h-[80px] space-y-1.5 shadow-inner">
                       {task.actions && task.actions.length > 0 ? (
                         task.actions.map(action => (
-                          <div key={action.id} className="group flex items-start gap-2 text-sm bg-white p-1.5 rounded border border-slate-100 shadow-sm">
+                          <div key={action.id} className="group flex items-start gap-2.5 text-sm bg-white p-2 rounded-lg border border-zinc-100 shadow-sm transition-all hover:border-zinc-300">
                             <button
                               onClick={() => toggleTaskAction(task.id, action.id)}
                               className={cn(
-                                "mt-0.5 shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors",
-                                action.isDone ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-300 hover:border-emerald-500"
+                                "mt-0.5 shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
+                                action.isDone ? "bg-zinc-900 border-zinc-900 text-white" : "border-zinc-300 hover:border-zinc-500"
                               )}
                             >
                               {action.isDone && <CheckCircle2 className="w-3 h-3" />}
                             </button>
-                            <div className={cn("flex-1 text-slate-700", action.isDone && "line-through text-slate-400")}>
+                            <div className={cn("flex-1 text-zinc-700 font-medium", action.isDone && "line-through text-zinc-400")}>
                               {action.text}
                             </div>
                             <button
                               onClick={() => removeTaskAction(task.id, action.id)}
-                              className="opacity-0 group-hover:opacity-100 shrink-0 text-slate-400 hover:text-red-500 transition-opacity"
+                              className="opacity-0 group-hover:opacity-100 shrink-0 text-zinc-400 hover:text-red-500 transition-opacity"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         ))
                       ) : (
-                        <div className="text-xs text-slate-400 text-center py-4">Нет записей</div>
+                        <div className="text-xs text-zinc-400 font-medium text-center py-6 flex flex-col items-center gap-2">
+                          <MessageSquare className="w-5 h-5 opacity-20" />
+                          Нет записей
+                        </div>
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-2 mt-auto">
+                    <div className="flex items-center gap-2 mt-2">
                       <Input
                         value={actionInputs[task.id] || ''}
                         onChange={e => setActionInputs(prev => ({ ...prev, [task.id]: e.target.value }))}
@@ -440,13 +454,13 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                           }
                         }}
                         placeholder="Зафиксировать действие..."
-                        className="h-8 text-xs"
+                        className="h-9 text-xs border-zinc-200 rounded-lg bg-zinc-50 focus:bg-white transition-colors"
                       />
                       <Button
                         onClick={() => addTaskAction(task.id)}
                         disabled={!actionInputs[task.id]?.trim()}
                         size="icon"
-                        className="h-8 w-8 shrink-0 bg-blue-600 hover:bg-blue-700"
+                        className="h-9 w-9 shrink-0 bg-zinc-900 hover:bg-zinc-800 rounded-lg shadow-sm"
                       >
                         <Send className="w-3.5 h-3.5 text-white" />
                       </Button>
@@ -455,8 +469,10 @@ export function CurrentWorkTab({ project, updateProject }: Props) {
                 </div>
               </div>
             </Card>
+            </motion.div>
           )})
         )}
+        </AnimatePresence>
       </div>
     </div>
   );

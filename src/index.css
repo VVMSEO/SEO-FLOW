@@ -2,16 +2,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #f1f5f9;
+  --color-bg: #fafafa;
   --color-card: #ffffff;
-  --color-main: #1e293b;
-  --color-muted: #64748b;
-  --color-accent: #2563eb;
-  --color-accent-soft: #dbeafe;
+  --color-main: #09090b;
+  --color-muted: #71717a;
+  --color-accent: #18181b;
+  --color-accent-soft: #f4f4f5;
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
-  --color-border: #e2e8f0;
+  --color-border: #e4e4e7;
 }
 
 @layer base {
@@ -19,5 +19,32 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--color-bg);
     color: var(--color-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar styles for a cleaner look */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d4d4d8;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a1a1aa;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
+

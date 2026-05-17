@@ -28,6 +28,7 @@ import Settings from './planner/Settings';
 import { User, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { exportProjectToExcel } from '../lib/exportExcel';
+import { motion, AnimatePresence } from 'motion/react';
 
 type TabType = 'overview' | 'accesses' | 'current' | 'queue' | 'log' | 'completed' | 'dailylog';
 type SectionType = 'tracker' | 'month' | 'projects_table' | 'clients' | 'categories' | 'settings' | 'project';
@@ -79,29 +80,33 @@ export function AppLayout({ user }: { user: User }) {
       case 'settings': return <Settings />;
       case 'project': 
         if (!activeProject) return (
-          <div className="flex-1 flex items-center justify-center text-slate-500">
-            <div className="text-center">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 inline-block mb-4">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 mx-auto"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+          <div className="flex-1 flex items-center justify-center text-zinc-500 bg-zinc-50/50">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-200 inline-block mb-4">
+                <Folder className="w-12 h-12 text-zinc-300" strokeWidth={1} />
               </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-1">Выберите проект</h3>
-              <p className="text-sm text-slate-500">Или создайте новый в боковой панели</p>
-            </div>
+              <h3 className="text-lg font-medium text-zinc-800 mb-1">Выберите проект</h3>
+              <p className="text-sm text-zinc-500">Или создайте новый в боковой панели</p>
+            </motion.div>
           </div>
         );
         return (
-          <div className="flex-1 flex flex-col h-full overflow-hidden">
+          <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
             {/* Top Navigation for Project */}
-            <div className="bg-white border-b border-slate-200 px-6 h-16 flex items-center justify-between shrink-0">
+            <div className="bg-white border-b border-zinc-100 px-6 h-16 flex items-center justify-between shrink-0 z-10 sticky top-0">
               <div className="flex items-center gap-4">
-                <h2 className="text-lg font-semibold tracking-tight text-slate-800">{activeProject.name}</h2>
-                <Button variant="ghost" size="sm" onClick={handleExport} className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 h-8" title="Экспорт в Excel">
+                <h2 className="text-lg font-semibold tracking-tight text-zinc-900">{activeProject.name}</h2>
+                <Button variant="ghost" size="sm" onClick={handleExport} className="text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 h-8 rounded-full" title="Экспорт в Excel">
                   <Download className="h-4 w-4 mr-1.5" />
                   <span className="text-xs font-medium">Excel</span>
                 </Button>
               </div>
               
-              <div className="flex h-full overflow-x-auto whitespace-nowrap hide-scrollbar">
+              <div className="flex items-center gap-1 bg-zinc-50 p-1 rounded-full border border-zinc-100 overflow-x-auto hide-scrollbar">
                 <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Обзор</TabButton>
                 <TabButton active={activeTab === 'accesses'} onClick={() => setActiveTab('accesses')}>Доступы</TabButton>
                 <TabButton active={activeTab === 'current'} onClick={() => setActiveTab('current')}>Текущая работа</TabButton>
@@ -113,15 +118,25 @@ export function AppLayout({ user }: { user: User }) {
             </div>
 
             {/* Project Tab Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 bg-zinc-50/30">
               <div className="max-w-5xl mx-auto">
-                {activeTab === 'overview' && <OverviewTab project={activeProject} updateProject={updateProject} />}
-                {activeTab === 'accesses' && <AccessesTab project={activeProject} updateProject={updateProject} />}
-                {activeTab === 'current' && <CurrentWorkTab project={activeProject} updateProject={updateProject} />}
-                {activeTab === 'dailylog' && <DailyLogTab project={activeProject} updateProject={updateProject} />}
-                {activeTab === 'queue' && <QueueTab project={activeProject} updateProject={updateProject} />}
-                {activeTab === 'log' && <LogTab project={activeProject} updateProject={updateProject} />}
-                {activeTab === 'completed' && <CompletedTab project={activeProject} updateProject={updateProject} />}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {activeTab === 'overview' && <OverviewTab project={activeProject} updateProject={updateProject} />}
+                    {activeTab === 'accesses' && <AccessesTab project={activeProject} updateProject={updateProject} />}
+                    {activeTab === 'current' && <CurrentWorkTab project={activeProject} updateProject={updateProject} />}
+                    {activeTab === 'dailylog' && <DailyLogTab project={activeProject} updateProject={updateProject} />}
+                    {activeTab === 'queue' && <QueueTab project={activeProject} updateProject={updateProject} />}
+                    {activeTab === 'log' && <LogTab project={activeProject} updateProject={updateProject} />}
+                    {activeTab === 'completed' && <CompletedTab project={activeProject} updateProject={updateProject} />}
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </div>
@@ -140,22 +155,22 @@ export function AppLayout({ user }: { user: User }) {
   ];
 
   if (settingsLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">Загрузка данных...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-zinc-50 text-zinc-500">Загрузка данных...</div>;
   }
 
   return (
-    <div className="flex h-screen bg-slate-100 text-slate-800 font-sans">
+    <div className="flex h-screen bg-zinc-50 text-zinc-900 font-sans selection:bg-zinc-200">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 text-slate-300">
-        <div className="h-16 px-6 border-b border-slate-800 flex items-center justify-between shrink-0">
-          <div className="font-extrabold text-lg text-white flex items-center gap-2">
+      <div className="w-[260px] bg-white border-r border-zinc-200 flex flex-col shrink-0">
+        <div className="h-16 px-6 flex items-center justify-between shrink-0">
+          <div className="font-bold text-lg text-zinc-900 flex items-center gap-2">
             SEO Planner
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-6 hide-scrollbar">
           {/* Main Navigation */}
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">
             {navItems.map(item => (
               <button
                 key={item.id}
@@ -164,30 +179,30 @@ export function AppLayout({ user }: { user: User }) {
                   if (item.id !== 'project') setActiveProjectId(null);
                 }}
                 className={cn(
-                  "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors text-left",
+                  "w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all text-left",
                   activeSection === item.id && activeProjectId === null
-                    ? "bg-blue-600 text-white font-medium" 
-                    : "hover:bg-slate-800 hover:text-white"
+                    ? "bg-zinc-900 text-white font-medium shadow-sm" 
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                 )}
               >
-                <div className={cn("shrink-0", activeSection === item.id && activeProjectId === null ? "text-white" : "text-slate-400")}>
+                <div className={cn("shrink-0", activeSection === item.id && activeProjectId === null ? "text-white" : "text-zinc-400 group-hover:text-zinc-600")}>
                   {item.icon}
                 </div>
-                <span className="truncate">{item.name}</span>
+                <span className="truncate text-sm">{item.name}</span>
               </button>
             ))}
           </nav>
 
           {/* Projects List */}
-          <div className="pt-4">
-            <div className="flex items-center justify-between px-3 mb-2">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2 group">
+              <h3 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                 Проекты ({projects.filter(p => p.active !== false).length})
               </h3>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-6 w-6 text-slate-400 hover:text-white hover:bg-slate-800 border-none"
+                className="h-6 w-6 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => setIsAddingProject(true)}
               >
                 <Plus className="h-4 w-4" />
@@ -195,15 +210,15 @@ export function AppLayout({ user }: { user: User }) {
             </div>
             
             {isAddingProject && (
-              <form onSubmit={handleAddProject} className="mb-2 px-3">
+              <form onSubmit={handleAddProject} className="mb-2 px-1">
                 <input
                   type="text"
                   autoFocus
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   onBlur={() => setIsAddingProject(false)}
-                  placeholder="Название проекта"
-                  className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                  placeholder="Название проекта..."
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all"
                 />
               </form>
             )}
@@ -214,13 +229,13 @@ export function AppLayout({ user }: { user: User }) {
                   key={project.id}
                   onClick={() => selectProject(project.id)}
                   className={cn(
-                    "w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors text-left",
+                    "w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all text-left group",
                     activeProjectId === project.id
-                      ? "bg-blue-600 text-white font-medium" 
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      ? "bg-zinc-900 text-white font-medium shadow-sm" 
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                   )}
                 >
-                  <Folder className={cn("h-4 w-4 shrink-0", activeProjectId === project.id ? "text-white" : "text-slate-400")} />
+                  <Folder className={cn("h-4 w-4 shrink-0", activeProjectId === project.id ? "text-white" : "text-zinc-400 group-hover:text-zinc-600")} strokeWidth={2} />
                   <span className="truncate text-sm">{project.name}</span>
                 </button>
               ))}
@@ -228,12 +243,17 @@ export function AppLayout({ user }: { user: User }) {
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-800 shrink-0">
+        <div className="p-4 border-t border-zinc-100 shrink-0 bg-zinc-50/50">
           <div className="flex items-center justify-between">
-            <div className="text-xs text-slate-400 truncate pr-2" title={user.email || ''}>
-              {user.email}
+            <div className="flex items-center gap-2 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center shrink-0">
+                <span className="text-xs font-medium text-zinc-600">{user.email?.charAt(0).toUpperCase()}</span>
+              </div>
+              <div className="text-xs text-zinc-600 font-medium truncate pr-2" title={user.email || ''}>
+                {user.email}
+              </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 border-none" title="Выйти">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Выйти">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -251,13 +271,20 @@ function TabButton({ active, onClick, children }: { active: boolean, onClick: ()
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center px-4 h-full text-sm font-medium transition-all border-b-2",
+        "relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors outline-none",
         active 
-          ? "text-blue-600 border-blue-600 bg-gradient-to-t from-blue-50 to-transparent" 
-          : "text-slate-500 border-transparent hover:text-slate-800"
+          ? "text-zinc-900" 
+          : "text-zinc-500 hover:text-zinc-900"
       )}
     >
-      <span className="uppercase tracking-wide text-xs font-semibold">{children}</span>
+      {active && (
+        <motion.div
+          layoutId="activeTab"
+          className="absolute inset-0 bg-white shadow-sm rounded-full border border-zinc-200/50"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+        />
+      )}
+      <span className="relative z-10">{children}</span>
     </button>
   );
 }
